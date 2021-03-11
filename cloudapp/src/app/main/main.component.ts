@@ -27,8 +27,8 @@ export class MainComponent implements OnInit, OnDestroy {
     rebuildorupdate: boolean = false;
     loading = false;
     settings: any = {
-        institution: '',
-        institutionType: '',
+        institution: '211030',
+        institutionType: 'a',
         holding: '905',
         lookupUrl: 'https://api.exldevnetwork.net.cn/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY',
         lookupPrefix: '',
@@ -92,9 +92,17 @@ export class MainComponent implements OnInit, OnDestroy {
 
     }
 
+    saved(){
+        this.show = !this.show;
+        this.settingsService.set(this.settings).subscribe(response => console.log("saved"));
+        this.alert.success(this.translate.instant('i18n.savedate'));
+    }
+
     getSettings() {
         this.settingsService.get().subscribe(settings => {
-            this.settings = settings
+            this.setDefaultValue(settings);
+
+            // this.settings = settings
             //若无数据设置默认值
             // this.updateBib(this.apiResult)
         });
@@ -257,6 +265,7 @@ export class MainComponent implements OnInit, OnDestroy {
         this.restService.call(request).subscribe({
             next: result => {
                 this.refreshPage();
+                this.alert.success(this.translate.instant('i18n.successupdate'));
             },
             error: (e: RestErrorResponse) => {
                 this.alert.error(this.translate.instant('i18n.errorupdate'));
@@ -358,6 +367,49 @@ export class MainComponent implements OnInit, OnDestroy {
             console.error(e);
         }
         return undefined;
+    }
+
+    setDefaultValue(settings:any){
+        if(settings.institution){
+            this.settings.institution = settings.institution
+        }else{
+            this.settings.institution = '211030'
+        }
+        if(settings.institutionType){
+            this.settings.institutionType = settings.institutionType
+        }else{
+            this.settings.institutionType = 'a'
+        }
+        if(settings.holding){
+            this.settings.holding = settings.holding
+        }else{
+            this.settings.holding = '905'
+        }
+        if(settings.lookupUrl){
+            this.settings.lookupUrl = settings.lookupUrl
+        }else{
+            this.settings.lookupUrl = 'https://api.exldevnetwork.net.cn/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY'
+        }
+        if(settings.lookupPrefix){
+            this.settings.lookupPrefix = settings.lookupPrefix
+        }else{
+            this.settings.lookupPrefix = ''
+        }
+        if(settings.classificationNumber){
+            this.settings.classificationNumber = settings.classificationNumber
+        }else{
+            this.settings.classificationNumber = 'd'
+        }
+        if(settings.titleNumber){
+            this.settings.titleNumber = settings.titleNumber
+        }else{
+            this.settings.titleNumber = 'e'
+        }
+        if(settings.callNo){
+            this.settings.callNo = settings.callNo
+        }else{
+            this.settings.callNo = 's'
+        }
     }
 
 }

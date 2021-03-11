@@ -1,59 +1,59 @@
 <section>
+    <section *ngIf="!show" >
+        <div style="text-align: right">
+            <button mat-raised-button color="primary" (click)="showConfig()"><img src="../assets/config.png"></button>
+        </div>
+    </section>
     <h1>
-        Welcome!
+        {{'i18n.tip'|translate}}
     </h1>
-    <p>Use this sample app to get you started. The app includes the following:</p>
     <ul>
-        <li>Listener for the <code>onPageLoad</code> event</li>
-        <li>Performs an API call using the <code>restService</code> service</li>
-        <li>Updates the object using the <code>restService</code> service</li>
-        <li>Refreshes the page in Alma</li>
+        <li>{{'i18n.tip1'|translate}}</li>
+        <li>{{'i18n.tip2'|translate}}</li>
+        <li>{{'i18n.tip3'|translate}}</li>
     </ul>
-    <p>Use these building blocks to be on your way to developing your own Cloud App.</p>
-</section>
-<section *ngIf="!show">
-    <button mat-raised-button color="primary" (click)="showConfig()"
-    >{{'i18n.Config'|translate}}</button>
 </section>
 <section *ngIf="show">
     <mat-card class="example-card">
-        <mat-card-header>
+        <mat-card-header >
             <mat-card-title>{{'i18n.Config'|translate}}</mat-card-title>
         </mat-card-header>
-        <mat-card-content>
-            <mat-form-field class="example-full-width">
+        <mat-card-content >
+            <mat-form-field class="example-full-width" >
                 <mat-label>{{'i18n.UserCode'|translate}}</mat-label>
                 <input matInput [(ngModel)]="settings.institution">
-            </mat-form-field>
-            <mat-form-field class="example-full-width">
-                <mat-label>{{'i18n.UserCodefile'|translate}}</mat-label>
-                <input matInput [(ngModel)]="settings.institutionType">
-            </mat-form-field>
-            <mat-form-field class="example-full-width">
-                <mat-label>{{'i18n.Collectionfield'|translate}}</mat-label>
-                <input matInput [(ngModel)]="settings.holding">
             </mat-form-field>
             <mat-form-field class="example-full-width">
                 <mat-label>{{'i18n.CallNumberEnquiry'|translate}}</mat-label>
                 <input matInput [(ngModel)]="settings.lookupUrl">
             </mat-form-field>
+            <!--<mat-form-field class="example-full-width">-->
+                <!--<mat-label>{{'i18n.CallNumberQueryType'|translate}}</mat-label>-->
+                <!--<input matInput [(ngModel)]="settings.lookupPrefix">-->
+            <!--</mat-form-field>-->
             <mat-form-field class="example-full-width">
-                <mat-label>{{'i18n.CallNumberQueryType'|translate}}</mat-label>
-                <input matInput [(ngModel)]="settings.lookupPrefix">
+                <mat-label>{{'i18n.Collectionfield'|translate}}</mat-label>
+                <input matInput [(ngModel)]="settings.holding" maxlength="3">
             </mat-form-field>
             <mat-form-field class="example-full-width">
-                <mat-label>{{'i18n.ClassificationNumberSubfield'|translate}}</mat-label>
-                <input matInput [(ngModel)]="settings.classificationNumber">
+                <mat-label>{{'i18n.UserCodefile'|translate}}（$）</mat-label>
+                <input matInput [(ngModel)]="settings.institutionType" maxlength="1">
             </mat-form-field>
             <mat-form-field class="example-full-width">
-                <mat-label>{{'i18n.SubfieldOfSpeciesNumber'|translate}}</mat-label>
-                <input matInput [(ngModel)]="settings.titleNumber">
+                <mat-label>{{'i18n.ClassificationNumberSubfield'|translate}}（$）</mat-label>
+                <input matInput [(ngModel)]="settings.classificationNumber" maxlength="1">
             </mat-form-field>
             <mat-form-field class="example-full-width">
-                <mat-label>{{'i18n.CallNumberSubfield'|translate}}</mat-label>
-                <input matInput [(ngModel)]="settings.callNo">
+                <mat-label>{{'i18n.SubfieldOfSpeciesNumber'|translate}}（$）</mat-label>
+                <input matInput [(ngModel)]="settings.titleNumber" maxlength="1">
+            </mat-form-field>
+            <mat-form-field class="example-full-width">
+                <mat-label>{{'i18n.CallNumberSubfield'|translate}}（$）</mat-label>
+                <input matInput [(ngModel)]="settings.callNo" maxlength="1">
             </mat-form-field>
         </mat-card-content>
+        <button mat-raised-button color="primary" (click)="saved()" [disabled]="!hasApiResult || loading"
+        >{{'i18n.save'|translate}}</button>
     </mat-card>
 </section>
 <section>
@@ -67,26 +67,26 @@
     </mat-card>
 </section>
 <section>
-        <button mat-raised-button color="primary" (click)="setSettings(false)" [disabled]="!hasApiResult || loading"
+    <button style="margin-right: 10px" mat-raised-button color="primary" (click)="setSettings(true)" [disabled]="!hasApiResult || loading"
+    >{{'i18n.Update'|translate}}</button>
+        <button  mat-raised-button color="primary" (click)="setSettings(false)" [disabled]="!hasApiResult || loading"
         >{{'i18n.Rebuild'|translate}}</button>
-        <button mat-raised-button color="primary" (click)="setSettings(true)" [disabled]="!hasApiResult || loading"
-        >{{'i18n.Update'|translate}}</button>
-    <mat-card class="example-card" >
-        <mat-card-header>
-            <mat-card-title>API Result</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-            <textarea #apiResultArea [value]="apiResult | json"></textarea>
-        </mat-card-content>
-        <mat-card-actions>
-            <button mat-raised-button color="primary" (click)="update(apiResultArea.value)"
-                    [disabled]="!hasApiResult || loading">重新生成
-            </button>
-            <button mat-raised-button color="primary" (click)="update(apiResultArea.value)"
-                    [disabled]="!hasApiResult || loading">更新
-            </button>
-        </mat-card-actions>
-    </mat-card>
+    <!--<mat-card class="example-card" >-->
+        <!--<mat-card-header>-->
+            <!--<mat-card-title>API Result</mat-card-title>-->
+        <!--</mat-card-header>-->
+        <!--<mat-card-content>-->
+            <!--<textarea #apiResultArea [value]="apiResult | json"></textarea>-->
+        <!--</mat-card-content>-->
+        <!--<mat-card-actions>-->
+            <!--<button mat-raised-button color="primary" (click)="update(apiResultArea.value)"-->
+                    <!--[disabled]="!hasApiResult || loading">重新生成-->
+            <!--</button>-->
+            <!--<button mat-raised-button color="primary" (click)="update(apiResultArea.value)"-->
+                    <!--[disabled]="!hasApiResult || loading">更新-->
+            <!--</button>-->
+        <!--</mat-card-actions>-->
+    <!--</mat-card>-->
 </section>
 <div class="loading-shade" *ngIf="loading">
     <mat-spinner diameter="50"></mat-spinner>

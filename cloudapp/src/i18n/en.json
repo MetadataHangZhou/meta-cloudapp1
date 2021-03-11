@@ -24,11 +24,16 @@
     "Update": "Update",
     "rebuildorupdateerrortip":"This collection field is not available, please rebuild it !",
     "errorupdate": "Failed to update data",
+    "successupdate": "Success to update data",
     "errorrefreshpage":"Failed to refresh page",
-    "errorjson": "Failed to parse json"
-
-
-
-
+    "errorjson": "Failed to parse json",
+    "tip": "Please open MARC!",
+    "rebuildbt": "Rebuild：Override all subfield",
+    "updatebt": "Update：Get Title number subfield and update Call-no subfield,if Title number subfield already exists, Only Update Call-no subfield.",
+    "tip1": "Please setting field  and subfield when first use.",
+    "tip2": "Click Rebuild,according the setting cover all field",
+    "tip3": "Click Update,according the setting get Title number subfield and generate Call-no subfield",
+    "save": "Save",
+    "savedate": "Saved"
   }
 }

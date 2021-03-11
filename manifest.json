@@ -1,7 +1,52 @@
 {
-   "id": "my-exl-cloudapp",
-   "title": "my-exl-cloudapp",
-   "subtitle": "my-exl-cloudapp",
-   "author": "metadata",
-   "description": "my-exl-cloudapp"
+   "id": "pol-post-correction",
+   "title": [
+      {
+         "lang": "en",
+         "text": "Title Sequence Number Lookup"
+      },
+      {
+         "lang": "zh",
+         "text": "标题序列号查找"
+      }
+   ],
+   "subtitle": [
+      {
+         "lang": "en",
+         "text": "Title Sequence Number Lookup"
+      },
+      {
+         "lang": "zh",
+         "text": "标题序列号查找"
+      }
+   ],
+   "author": "Metadata HangZhou Co.Ltd.",
+   "description": [
+      {
+         "lang": "en",
+         "text": "Lookup sequence number from external table via API and create call number if the call number doesn't exist yet."
+      },
+      {
+         "lang": "zh",
+         "text": "通过API从外部表查找序列号，如果调用号还不存在，则创建调用号。"
+      }
+   ],
+   "entities": [
+      "PO_LINE"
+   ],
+   "icon": {
+      "type": "url",
+      "value": "/assets/ppc_logo.png"
+   },
+   "fullscreen": {
+      "allow": true,
+      "open": false
+   },
+   "contentSecurity": {
+      "connectSrc": [],
+      "sandbox": {
+         "popups": true,
+         "modals": true
+      }
+   }
 }
