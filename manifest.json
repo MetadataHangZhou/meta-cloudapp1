@@ -7,7 +7,7 @@
       },
       {
          "lang": "zh",
-         "text": "标题序列号查找"
+         "text": "种次号查找"
       }
    ],
    "subtitle": [
@@ -17,7 +17,7 @@
       },
       {
          "lang": "zh",
-         "text": "标题序列号查找"
+         "text": "种次号查找"
       }
    ],
    "author": "Metadata HangZhou Co.Ltd.",
@@ -28,7 +28,7 @@
       },
       {
          "lang": "zh",
-         "text": "通过API从外部表查找序列号，如果调用号还不存在，则创建调用号。"
+         "text": "通过API从外部表查找种次号，如果索书号不存在，则创建索书号。"
       }
    ],
    "entities": [
@@ -36,7 +36,7 @@
    ],
    "icon": {
       "type": "url",
-      "value": "/assets/ppc_logo.png"
+      "value": "/assets/tsn_logo.png"
    },
    "fullscreen": {
       "allow": true,
