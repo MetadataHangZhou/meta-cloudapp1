@@ -1,0 +1,34 @@
+{
+  "i18n": {
+    "IllegalParameter": "illegal parameter",
+    "NotAllowUpdate": "not allow update received poline",
+    "NoPoLineTip": "Please navigate to a POLINE record.",
+    "Update": "Update",
+    "UpdateDesc": "POL Post Correction will create new POL,and then cancel the current POL.",
+    "UpdatePoLine": "Update POLINE",
+    "Currency": "Currency",
+    "Vendor": "Vendor",
+    "Fund": "Fund",
+    "UpdateSuccess": "Update success，create new POL [ {{number}} ]!",
+    "UpdateConfirm": "Do you want to cancel Current POLINE,and create a new POLine?",
+    "Config": "Config",
+    "UserCode": "The user code",
+    "UserCodefile" : "User code field",
+    "Collectionfield": "Collection field",
+    "CallNumberEnquiry": "Call Number Enquiry URL",
+    "CallNumberQueryType": "Call number query type",
+    "ClassificationNumberSubfield": "Classification number subfield",
+    "SubfieldOfSpeciesNumber": "Subfield of species number",
+    "CallNumberSubfield": "Call number subfield",
+    "Rebuild": "Rebuild",
+    "Update": "Update",
+    "rebuildorupdateerrortip":"This collection field is not available, please rebuild it !",
+    "errorupdate": "Failed to update data",
+    "errorrefreshpage":"Failed to refresh page",
+    "errorjson": "Failed to parse json"
+
+
+
+
+  }
+}

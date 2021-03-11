@@ -1,0 +1,30 @@
+{
+  "i18n": {
+    "IllegalParameter": "非法参数",
+    "NotAllowUpdate": "已接收的订单行不允许修改",
+    "NoPoLineTip": "请导航到订单行",
+    "Update": "修改",
+    "UpdateDesc": "订单行修正将创建新的订单行,并关闭原有订单行",
+    "UpdatePoLine": "修改订单行",
+    "Currency": "币种",
+    "Vendor": "书商",
+    "Fund": "经费",
+    "UpdateSuccess": "更新成功，已生成新的订单行POL [{{number}}]!",
+    "UpdateConfirm": "是否要关闭当前订单行,并创建新的订单行?",
+    "Config": "配置",
+    "UserCode": "用户代码",
+    "UserCodefile" : "用户代码字段",
+    "Collectionfield": "馆藏字段",
+    "CallNumberEnquiry": "索书号查询URL",
+    "CallNumberQueryType": "索书号查询类型",
+    "ClassificationNumberSubfield": "分类号子字段",
+    "SubfieldOfSpeciesNumber": "种次号子字段",
+    "CallNumberSubfield": "索书号子字段",
+    "Rebuild": "重新生成",
+    "Update": "更新",
+    "rebuildorupdateerrortip":"无此馆藏字段，请先重新生成！",
+    "errorupdate": "更新数据失败",
+    "errorrefreshpage":"刷新页面失败",
+    "errorjson": "解析JSON失败"
+  }
+}
