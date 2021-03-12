@@ -35,6 +35,7 @@
     "tip3": "Click Update,according the setting get Title number subfield and generate Call-no subfield",
     "save": "Save",
     "savedate": "Saved",
-    "rebuilderror": "Faild ，No Classification number！"
+    "rebuilderror": "Faild ，No Classification number！",
+    "error": "Faild,Unauthorized link : {{url}}"
   }
 }

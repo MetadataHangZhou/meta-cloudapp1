@@ -124,23 +124,23 @@ export class MainComponent implements OnInit, OnDestroy {
             //遍历查询当前馆藏字段，若有则进行更新数据，若无则重建数据
             if (this.settings.holding == datafield.getAttribute("tag")) {
                 this.rebuildorupdate = true;
-                console.log(datafield)
+                // console.log(datafield)
                 datafield995 = datafield;
                 Array.from(datafield.getElementsByTagName("subfield")).forEach(subfield => {
                     if (this.settings.classificationNumber == subfield.getAttribute("code")) {
                         code = subfield.textContent
                         outsubfield = subfield
-                        console.log(subfield.textContent)
+                        // console.log(subfield.textContent)
                     }
                     if (this.settings.titleNumber == subfield.getAttribute("code")) {
                         ecode = subfield.textContent
                         eoutsubfield = subfield
-                        console.log(subfield.textContent)
+                        // console.log(subfield.textContent)
                     }
                     if (this.settings.callNo == subfield.getAttribute("code")) {
                         scode = subfield.textContent
                         soutsubfield = subfield
-                        console.log(subfield.textContent)
+                        // console.log(subfield.textContent)
                     }
                 });
             } else {
@@ -148,16 +148,16 @@ export class MainComponent implements OnInit, OnDestroy {
                 if ('690' == datafield.getAttribute("tag")) {
                     datafield995 = datafield.cloneNode();
                     datafield995.setAttribute("tag",this.settings.holding)
-                    console.log(datafield995)
+                    // console.log(datafield995)
                     Array.from(datafield.getElementsByTagName("subfield")).forEach(subfield => {
                         if ('a' == subfield.getAttribute("code")) {
                             code = subfield.textContent
                             outsubfield = subfield
-                            console.log(subfield.textContent)
+                            // console.log(subfield.textContent)
                         }
                     });
                 }else{
-                    console.log('111')
+                    // console.log('111')
                     // this.alert.error(this.translate.instant('i18n.rebuilderror'));
                 }
             }
@@ -167,7 +167,7 @@ export class MainComponent implements OnInit, OnDestroy {
             this.alert.error(this.translate.instant('i18n.rebuildorupdateerrortip'));
         } else {
             if(this.choosebt){
-                let seq = "7"
+                let seq ;
                 outsubfield.textContent = code.split("/")[0]
                 this.fetch_z311(code).then((res:any)=>{
                     seq = res.seq
@@ -203,7 +203,7 @@ export class MainComponent implements OnInit, OnDestroy {
                     }
                     value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
 
-                    console.log(value)
+                    // console.log(value)
                     this.updateAnies(value.anies[0]);
                 })
             }else{
@@ -211,7 +211,8 @@ export class MainComponent implements OnInit, OnDestroy {
                     this.loading = false;
                     this.alert.error(this.translate.instant('i18n.rebuilderror'));
                 }
-                let seq = "7"
+                // let seq = "7"
+                let seq;
                 outsubfield.textContent = code.split("/")[0]
                 this.fetch_z311(code).then((res: any) => {
                     datafield995.innerHTML = '';
@@ -256,7 +257,7 @@ export class MainComponent implements OnInit, OnDestroy {
                     // doc.documentElement.removeChild(datafield995);
                     value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
 
-                    console.log(value)
+                    // console.log(value)
                     this.updateAnies(value.anies[0]);
                 })
             }
@@ -266,16 +267,19 @@ export class MainComponent implements OnInit, OnDestroy {
 
     fetch_z311(key: string) {
         return new Promise((resolve, reject) => {
-            // this.http.get(this.settings.lookupUrl.replace("KEY", key), {
-            //     headers: {
-            //         'X-Proxy-Host': 'http://aleph20.exlibris.com.cn:8992',
-            //         'Authorization': 'Bearer eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJFeGxDbG91ZEFwcDohfmV4bGlicmlzZ3JvdXAvYWxtYS1zY2hlZHVsZXIiLCJzdWIiOiJqb3NodyIsImluc3RfY29kZSI6IlRSX0lOVEVHUkFUSU9OX0lOU1QiLCJ1cmxzIjp7ImFsbWEiOiJodHRwczovL2xvY2FsaG9zdDo0MjAxLyJ9LCJleHAiOjE2MTI3MDM4OTh9.ShNF9FLMJzF5IZEClL1P0QjtSNo57WH0ZY4yQKKzxhl0l93tNxQFxQa-m2E1EX9AjmFNb5-v98yOhCmLM1wNewelxcd2uIAxhvMNoQFl3tQr8Iq7Jt5KyaN6iG2w8gMSxRwj2OQ8xeTqpZM2dnDZKEJMCd3397quExzjLSbYInf4MgFQKyw4i532S7L3rEVg2oQt72_qJnZboULci027oZsfIg9MshkyoCiIw04fcV26jC8JD-pRRNrs3qqfFCyAnlbIBt_oXr32BTTebg1IzNT41ezCf77FyBMY0oKVFzeisn-Jo2iSIxRBjJ8nrgqsvG8XgxbwCwFevnU-hHZIZQ'
-            //     }
-            // }).subscribe(function (data) {
-            //     console.log(data)
-            //     resolve(data)
-            // })
-            resolve({seq: 7})
+            this.http.get(this.settings.lookupUrl.replace("KEY", key), {
+                headers: {
+                    'X-Proxy-Host': 'http://aleph20.exlibris.com.cn:8992',
+                    'Authorization': 'Bearer eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJFeGxDbG91ZEFwcDohfmV4bGlicmlzZ3JvdXAvYWxtYS1zY2hlZHVsZXIiLCJzdWIiOiJqb3NodyIsImluc3RfY29kZSI6IlRSX0lOVEVHUkFUSU9OX0lOU1QiLCJ1cmxzIjp7ImFsbWEiOiJodHRwczovL2xvY2FsaG9zdDo0MjAxLyJ9LCJleHAiOjE2MTI3MDM4OTh9.ShNF9FLMJzF5IZEClL1P0QjtSNo57WH0ZY4yQKKzxhl0l93tNxQFxQa-m2E1EX9AjmFNb5-v98yOhCmLM1wNewelxcd2uIAxhvMNoQFl3tQr8Iq7Jt5KyaN6iG2w8gMSxRwj2OQ8xeTqpZM2dnDZKEJMCd3397quExzjLSbYInf4MgFQKyw4i532S7L3rEVg2oQt72_qJnZboULci027oZsfIg9MshkyoCiIw04fcV26jC8JD-pRRNrs3qqfFCyAnlbIBt_oXr32BTTebg1IzNT41ezCf77FyBMY0oKVFzeisn-Jo2iSIxRBjJ8nrgqsvG8XgxbwCwFevnU-hHZIZQ'
+                }
+            }).subscribe(function (data) {
+                console.log(data)
+                resolve(data)
+            },error=>{
+                this.alert.error(this.translate.instant('i18n.error',{url:this.settings.lookupUrl}));
+                reject(error)
+            })
+            // resolve({seq: 7})
             //错误给出提示当前url未授权  ---待完成
         })
 
@@ -299,7 +303,7 @@ export class MainComponent implements OnInit, OnDestroy {
             },
             error: (e: RestErrorResponse) => {
                 this.alert.error(this.translate.instant('i18n.errorupdate'));
-                console.error(e);
+                // console.error(e);
                 this.loading = false;
             }
         });
@@ -321,7 +325,7 @@ export class MainComponent implements OnInit, OnDestroy {
         this.eventsService.refreshPage().subscribe({
             next: () => this.alert.success('Success!'),
             error: e => {
-                console.error(e);
+                // console.error(e);
                 this.alert.error(this.translate.instant('i18n.errorrefreshpage'));
             },
             complete: () => this.loading = false
