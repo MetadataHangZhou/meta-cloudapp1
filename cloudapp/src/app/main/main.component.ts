@@ -103,9 +103,6 @@ export class MainComponent implements OnInit, OnDestroy {
         this.settingsService.get().subscribe(settings => {
             this.setDefaultValue(settings);
 
-            // this.settings = settings
-            //若无数据设置默认值
-            // this.updateBib(this.apiResult)
         });
 
     }
@@ -170,22 +167,6 @@ export class MainComponent implements OnInit, OnDestroy {
                 let seq;
                 outsubfield.textContent = code.split("/")[0]
                 this.fetch_z311(code).then((res: any) => {
-                    // datafield995.innerHTML = '';
-                    // if (this.settings.institution != '' && this.settings.institutionType != '') {
-                    //     const template = `<subfield code=${this.settings.institutionType}>${this.settings.institution}</subfield>`;
-                    //     let tempNode = document.createElementNS("", 'div');
-                    //     tempNode.innerHTML = template;
-                    //     let frag = tempNode.firstChild;
-                    //     datafield995.appendChild(frag)
-                    // }
-                    //
-                    // if (code) {
-                    //     const template = `<subfield code=${this.settings.classificationNumber}>${code}</subfield>`;
-                    //     let tempNode = document.createElementNS('', 'div');
-                    //     tempNode.innerHTML = template;
-                    //     let frag = tempNode.firstChild;
-                    //     datafield995.appendChild(frag)
-                    // }
                     seq = res.seq
                     if (!eoutsubfield) {
                         if (datafield995 && seq) {
@@ -317,7 +298,6 @@ export class MainComponent implements OnInit, OnDestroy {
                 reject(error)
             })
             // resolve({seq: 7})
-            //错误给出提示当前url未授权  ---待完成
         })
 
     }
