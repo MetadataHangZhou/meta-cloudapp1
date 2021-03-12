@@ -170,6 +170,22 @@ export class MainComponent implements OnInit, OnDestroy {
                 let seq ;
                 outsubfield.textContent = code.split("/")[0]
                 this.fetch_z311(code).then((res:any)=>{
+                    // datafield995.innerHTML = '';
+                    // if (this.settings.institution != '' && this.settings.institutionType != '') {
+                    //     const template = `<subfield code=${this.settings.institutionType}>${this.settings.institution}</subfield>`;
+                    //     let tempNode = document.createElementNS("", 'div');
+                    //     tempNode.innerHTML = template;
+                    //     let frag = tempNode.firstChild;
+                    //     datafield995.appendChild(frag)
+                    // }
+                    //
+                    // if (code) {
+                    //     const template = `<subfield code=${this.settings.classificationNumber}>${code}</subfield>`;
+                    //     let tempNode = document.createElementNS('', 'div');
+                    //     tempNode.innerHTML = template;
+                    //     let frag = tempNode.firstChild;
+                    //     datafield995.appendChild(frag)
+                    // }
                     seq = res.seq
                     if(!eoutsubfield) {
                         if(datafield995 && seq) {
@@ -181,7 +197,8 @@ export class MainComponent implements OnInit, OnDestroy {
                         }
                     }else{
                         if(seq) {
-                            eoutsubfield.textContent = seq
+                            eoutsubfield.textContent = seq;
+
                         }
                     }
 
@@ -201,6 +218,9 @@ export class MainComponent implements OnInit, OnDestroy {
                             soutsubfield.textContent = `${code}/${seq}`
                         }
                     }
+                    this.sortlist(datafield995)
+                    // console.log(datafield995)
+
                     value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
 
                     // console.log(value)
@@ -251,6 +271,8 @@ export class MainComponent implements OnInit, OnDestroy {
                         datafield995.appendChild(frag)
                     }
 
+                    this.sortlist(datafield995)
+
                     if (!this.choosebt){
                         doc.documentElement.appendChild(datafield995);
                     }
@@ -263,6 +285,19 @@ export class MainComponent implements OnInit, OnDestroy {
             }
 
         }
+    }
+
+    sortlist(value:any){
+        var new_list_child = value.children;
+
+        new_list_child = Array.prototype.slice.call(new_list_child).sort(function(a,b){
+            let aCode = a.getAttribute("code")
+            let bCode = b.getAttribute("code")
+            return aCode > bCode?1:-1;
+        })
+        new_list_child.forEach(function(el){
+            value.appendChild(el);
+        })
     }
 
     fetch_z311(key: string) {
