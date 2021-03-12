@@ -2,7 +2,7 @@ import {Subscription} from 'rxjs';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {Component, OnInit, OnDestroy, NgModule} from '@angular/core';
 import {HttpClientModule, HttpClient} from '@angular/common/http'
-import { TranslateService } from '@ngx-translate/core';
+import {TranslateService} from '@ngx-translate/core';
 import {
     CloudAppRestService, CloudAppEventsService, Request, HttpMethod,
     Entity, PageInfo, RestErrorResponse, AlertService, CloudAppSettingsService, EntityType
@@ -84,7 +84,7 @@ export class MainComponent implements OnInit, OnDestroy {
         this.show = !this.show;
     }
 
-    setSettings(value:any) {
+    setSettings(value: any) {
         this.loading = true;
         this.choosebt = value;
         this.settingsService.set(this.settings).subscribe(response => this.updateBib(this.apiResult));
@@ -93,7 +93,7 @@ export class MainComponent implements OnInit, OnDestroy {
 
     }
 
-    saved(){
+    saved() {
         this.show = !this.show;
         this.settingsService.set(this.settings).subscribe(response => console.log("saved"));
         this.alert.success(this.translate.instant('i18n.savedate'));
@@ -147,7 +147,7 @@ export class MainComponent implements OnInit, OnDestroy {
                 this.rebuildorupdate = false;
                 if ('690' == datafield.getAttribute("tag")) {
                     datafield995 = datafield.cloneNode();
-                    datafield995.setAttribute("tag",this.settings.holding)
+                    datafield995.setAttribute("tag", this.settings.holding)
                     // console.log(datafield995)
                     Array.from(datafield.getElementsByTagName("subfield")).forEach(subfield => {
                         if ('a' == subfield.getAttribute("code")) {
@@ -156,7 +156,7 @@ export class MainComponent implements OnInit, OnDestroy {
                             // console.log(subfield.textContent)
                         }
                     });
-                }else{
+                } else {
                     // console.log('111')
                     // this.alert.error(this.translate.instant('i18n.rebuilderror'));
                 }
@@ -166,10 +166,10 @@ export class MainComponent implements OnInit, OnDestroy {
             this.loading = false;
             this.alert.error(this.translate.instant('i18n.rebuildorupdateerrortip'));
         } else {
-            if(this.choosebt){
-                let seq ;
+            if (this.choosebt) {
+                let seq;
                 outsubfield.textContent = code.split("/")[0]
-                this.fetch_z311(code).then((res:any)=>{
+                this.fetch_z311(code).then((res: any) => {
                     // datafield995.innerHTML = '';
                     // if (this.settings.institution != '' && this.settings.institutionType != '') {
                     //     const template = `<subfield code=${this.settings.institutionType}>${this.settings.institution}</subfield>`;
@@ -187,16 +187,16 @@ export class MainComponent implements OnInit, OnDestroy {
                     //     datafield995.appendChild(frag)
                     // }
                     seq = res.seq
-                    if(!eoutsubfield) {
-                        if(datafield995 && seq) {
+                    if (!eoutsubfield) {
+                        if (datafield995 && seq) {
                             const template = `<subfield code=${this.settings.titleNumber}>${seq}</subfield>`;
-                            let tempNode = document.createElementNS('','div');
+                            let tempNode = document.createElementNS('', 'div');
                             tempNode.innerHTML = template;
                             let frag = tempNode.firstChild;
                             datafield995.appendChild(frag)
                         }
-                    }else{
-                        if(seq) {
+                    } else {
+                        if (seq) {
                             eoutsubfield.textContent = seq;
 
                         }
@@ -205,16 +205,16 @@ export class MainComponent implements OnInit, OnDestroy {
                     // datafield995.removeChild(eoutsubfield)
                     // datafield995.removeChild(soutsubfield)
 
-                    if(!soutsubfield) {
-                        if(datafield995 && code && seq) {
+                    if (!soutsubfield) {
+                        if (datafield995 && code && seq) {
                             const template = `<subfield code=${this.settings.callNo}>${code}/${seq}</subfield>`;
-                            let tempNode = document.createElementNS("",'div');
+                            let tempNode = document.createElementNS("", 'div');
                             tempNode.innerHTML = template;
                             let frag = tempNode.firstChild;
                             datafield995.appendChild(frag)
                         }
-                    }else{
-                        if(code && seq) {
+                    } else {
+                        if (code && seq) {
                             soutsubfield.textContent = `${code}/${seq}`
                         }
                     }
@@ -226,8 +226,8 @@ export class MainComponent implements OnInit, OnDestroy {
                     // console.log(value)
                     this.updateAnies(value.anies[0]);
                 })
-            }else{
-                if(!code){
+            } else {
+                if (!code) {
                     this.loading = false;
                     this.alert.error(this.translate.instant('i18n.rebuilderror'));
                 }
@@ -273,7 +273,7 @@ export class MainComponent implements OnInit, OnDestroy {
 
                     this.sortlist(datafield995)
 
-                    if (!this.choosebt){
+                    if (!this.choosebt) {
                         doc.documentElement.appendChild(datafield995);
                     }
                     // doc.documentElement.removeChild(datafield995);
@@ -287,15 +287,15 @@ export class MainComponent implements OnInit, OnDestroy {
         }
     }
 
-    sortlist(value:any){
+    sortlist(value: any) {
         var new_list_child = value.children;
 
-        new_list_child = Array.prototype.slice.call(new_list_child).sort(function(a,b){
+        new_list_child = Array.prototype.slice.call(new_list_child).sort(function (a, b) {
             let aCode = a.getAttribute("code")
             let bCode = b.getAttribute("code")
-            return aCode > bCode?1:-1;
+            return aCode > bCode ? 1 : -1;
         })
-        new_list_child.forEach(function(el){
+        new_list_child.forEach(function (el) {
             value.appendChild(el);
         })
     }
@@ -308,10 +308,12 @@ export class MainComponent implements OnInit, OnDestroy {
                     'Authorization': 'Bearer eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJFeGxDbG91ZEFwcDohfmV4bGlicmlzZ3JvdXAvYWxtYS1zY2hlZHVsZXIiLCJzdWIiOiJqb3NodyIsImluc3RfY29kZSI6IlRSX0lOVEVHUkFUSU9OX0lOU1QiLCJ1cmxzIjp7ImFsbWEiOiJodHRwczovL2xvY2FsaG9zdDo0MjAxLyJ9LCJleHAiOjE2MTI3MDM4OTh9.ShNF9FLMJzF5IZEClL1P0QjtSNo57WH0ZY4yQKKzxhl0l93tNxQFxQa-m2E1EX9AjmFNb5-v98yOhCmLM1wNewelxcd2uIAxhvMNoQFl3tQr8Iq7Jt5KyaN6iG2w8gMSxRwj2OQ8xeTqpZM2dnDZKEJMCd3397quExzjLSbYInf4MgFQKyw4i532S7L3rEVg2oQt72_qJnZboULci027oZsfIg9MshkyoCiIw04fcV26jC8JD-pRRNrs3qqfFCyAnlbIBt_oXr32BTTebg1IzNT41ezCf77FyBMY0oKVFzeisn-Jo2iSIxRBjJ8nrgqsvG8XgxbwCwFevnU-hHZIZQ'
                 }
             }).subscribe(function (data) {
+                this.loading = false;
                 console.log(data)
                 resolve(data)
-            },error=>{
-                this.alert.error(this.translate.instant('i18n.error',{url:this.settings.lookupUrl}));
+            }, error => {
+                this.loading = false;
+                this.alert.error(this.translate.instant('i18n.error', {url: this.settings.lookupUrl}));
                 reject(error)
             })
             // resolve({seq: 7})
@@ -438,45 +440,45 @@ export class MainComponent implements OnInit, OnDestroy {
         return undefined;
     }
 
-    setDefaultValue(settings:any){
-        if(settings.institution){
+    setDefaultValue(settings: any) {
+        if (settings.institution) {
             this.settings.institution = settings.institution
-        }else{
+        } else {
             this.settings.institution = '211030'
         }
-        if(settings.institutionType){
+        if (settings.institutionType) {
             this.settings.institutionType = settings.institutionType
-        }else{
+        } else {
             this.settings.institutionType = 'a'
         }
-        if(settings.holding){
+        if (settings.holding) {
             this.settings.holding = settings.holding
-        }else{
+        } else {
             this.settings.holding = '905'
         }
-        if(settings.lookupUrl){
+        if (settings.lookupUrl) {
             this.settings.lookupUrl = settings.lookupUrl
-        }else{
+        } else {
             this.settings.lookupUrl = 'https://api.exldevnetwork.net.cn/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY'
         }
-        if(settings.lookupPrefix){
+        if (settings.lookupPrefix) {
             this.settings.lookupPrefix = settings.lookupPrefix
-        }else{
+        } else {
             this.settings.lookupPrefix = ''
         }
-        if(settings.classificationNumber){
+        if (settings.classificationNumber) {
             this.settings.classificationNumber = settings.classificationNumber
-        }else{
+        } else {
             this.settings.classificationNumber = 'd'
         }
-        if(settings.titleNumber){
+        if (settings.titleNumber) {
             this.settings.titleNumber = settings.titleNumber
-        }else{
+        } else {
             this.settings.titleNumber = 'e'
         }
-        if(settings.callNo){
+        if (settings.callNo) {
             this.settings.callNo = settings.callNo
-        }else{
+        } else {
             this.settings.callNo = 's'
         }
     }
