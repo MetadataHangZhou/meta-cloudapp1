@@ -85,6 +85,7 @@ export class MainComponent implements OnInit, OnDestroy {
     }
 
     setSettings(value:any) {
+        this.loading = true;
         this.choosebt = value;
         this.settingsService.set(this.settings).subscribe(response => this.updateBib(this.apiResult));
         // console.log(this.apiResult)
@@ -154,85 +155,112 @@ export class MainComponent implements OnInit, OnDestroy {
                             outsubfield = subfield
                             console.log(subfield.textContent)
                         }
-                        // if (this.settings.titleNumber == subfield.getAttribute("code")) {
-                        //     ecode = subfield.textContent
-                        //     eoutsubfield = subfield
-                        //     console.log(subfield.textContent)
-                        // }
-                        // if (this.settings.callNo == subfield.getAttribute("code")) {
-                        //     scode = subfield.textContent
-                        //     soutsubfield = subfield
-                        //     console.log(subfield.textContent)
-                        // }
                     });
+                }else{
+                    console.log('111')
+                    // this.alert.error(this.translate.instant('i18n.rebuilderror'));
                 }
             }
         });
         if (this.choosebt && !this.rebuildorupdate) {
+            this.loading = false;
             this.alert.error(this.translate.instant('i18n.rebuildorupdateerrortip'));
         } else {
-            let seq = "7"
-            outsubfield.textContent = code.split("/")[0]
-            this.fetch_z311(code).then((res: any) => {
-                datafield995.innerHTML = '';
-                if (this.settings.institution != '' && this.settings.institutionType != '') {
-                    const template = `<subfield code=${this.settings.institutionType}>${this.settings.institution}</subfield>`;
-                    let tempNode = document.createElementNS("", 'div');
-                    tempNode.innerHTML = template;
-                    let frag = tempNode.firstChild;
-                    datafield995.appendChild(frag)
+            if(this.choosebt){
+                let seq = "7"
+                outsubfield.textContent = code.split("/")[0]
+                this.fetch_z311(code).then((res:any)=>{
+                    seq = res.seq
+                    if(!eoutsubfield) {
+                        if(datafield995 && seq) {
+                            const template = `<subfield code=${this.settings.titleNumber}>${seq}</subfield>`;
+                            let tempNode = document.createElementNS('','div');
+                            tempNode.innerHTML = template;
+                            let frag = tempNode.firstChild;
+                            datafield995.appendChild(frag)
+                        }
+                    }else{
+                        if(seq) {
+                            eoutsubfield.textContent = seq
+                        }
+                    }
+
+                    // datafield995.removeChild(eoutsubfield)
+                    // datafield995.removeChild(soutsubfield)
+
+                    if(!soutsubfield) {
+                        if(datafield995 && code && seq) {
+                            const template = `<subfield code=${this.settings.callNo}>${code}/${seq}</subfield>`;
+                            let tempNode = document.createElementNS("",'div');
+                            tempNode.innerHTML = template;
+                            let frag = tempNode.firstChild;
+                            datafield995.appendChild(frag)
+                        }
+                    }else{
+                        if(code && seq) {
+                            soutsubfield.textContent = `${code}/${seq}`
+                        }
+                    }
+                    value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
+
+                    console.log(value)
+                    this.updateAnies(value.anies[0]);
+                })
+            }else{
+                if(!code){
+                    this.loading = false;
+                    this.alert.error(this.translate.instant('i18n.rebuilderror'));
                 }
+                let seq = "7"
+                outsubfield.textContent = code.split("/")[0]
+                this.fetch_z311(code).then((res: any) => {
+                    datafield995.innerHTML = '';
+                    // if (this.settings.institution != '' && this.settings.institutionType != '') {
+                    //     const template = `<subfield code=${this.settings.institutionType}>${this.settings.institution}</subfield>`;
+                    //     let tempNode = document.createElementNS("", 'div');
+                    //     tempNode.innerHTML = template;
+                    //     let frag = tempNode.firstChild;
+                    //     datafield995.appendChild(frag)
+                    // }
 
-                if (code) {
-                    const template = `<subfield code=${this.settings.classificationNumber}>${code}</subfield>`;
-                    let tempNode = document.createElementNS('', 'div');
-                    tempNode.innerHTML = template;
-                    let frag = tempNode.firstChild;
-                    datafield995.appendChild(frag)
-                }
+                    if (code) {
+                        const template = `<subfield code=${this.settings.classificationNumber}>${code}</subfield>`;
+                        let tempNode = document.createElementNS('', 'div');
+                        tempNode.innerHTML = template;
+                        let frag = tempNode.firstChild;
+                        datafield995.appendChild(frag)
+                    }
 
 
-                seq = res.seq
-                // if(!eoutsubfield) {
-                if (datafield995 && seq) {
-                    const template = `<subfield code=${this.settings.titleNumber}>${seq}</subfield>`;
-                    let tempNode = document.createElementNS('', 'div');
-                    tempNode.innerHTML = template;
-                    let frag = tempNode.firstChild;
-                    datafield995.appendChild(frag)
-                }
-                // }else{
-                //   if(seq) {
-                //     eoutsubfield.textContent = seq
-                //   }
-                // }
+                    seq = res.seq
+                    // if(!eoutsubfield) {
+                    if (datafield995 && seq) {
+                        const template = `<subfield code=${this.settings.titleNumber}>${seq}</subfield>`;
+                        let tempNode = document.createElementNS('', 'div');
+                        tempNode.innerHTML = template;
+                        let frag = tempNode.firstChild;
+                        datafield995.appendChild(frag)
+                    }
 
-                // datafield995.removeChild(eoutsubfield)
-                // datafield995.removeChild(soutsubfield)
+                    if (datafield995 && code && seq) {
+                        const template = `<subfield code=${this.settings.callNo}>${code}/${seq}</subfield>`;
+                        let tempNode = document.createElementNS("", 'div');
+                        tempNode.innerHTML = template;
+                        let frag = tempNode.firstChild;
+                        datafield995.appendChild(frag)
+                    }
 
-                // if(!soutsubfield) {
-                if (datafield995 && code && seq) {
-                    const template = `<subfield code=${this.settings.callNo}>${code}/${seq}</subfield>`;
-                    let tempNode = document.createElementNS("", 'div');
-                    tempNode.innerHTML = template;
-                    let frag = tempNode.firstChild;
-                    datafield995.appendChild(frag)
-                }
-                // }else{
-                //   if(code && seq) {
-                //     soutsubfield.textContent = `${code}/${seq}`
-                //   }
-                // }
+                    if (!this.choosebt){
+                        doc.documentElement.appendChild(datafield995);
+                    }
+                    // doc.documentElement.removeChild(datafield995);
+                    value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
 
-                if (!this.choosebt){
-                    doc.documentElement.appendChild(datafield995);
-                }
-                // doc.documentElement.removeChild(datafield995);
-                value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
+                    console.log(value)
+                    this.updateAnies(value.anies[0]);
+                })
+            }
 
-                console.log(value)
-                this.updateAnies(value.anies[0]);
-            })
         }
     }
 
@@ -248,6 +276,7 @@ export class MainComponent implements OnInit, OnDestroy {
             //     resolve(data)
             // })
             resolve({seq: 7})
+            //错误给出提示当前url未授权  ---待完成
         })
 
     }
@@ -264,6 +293,7 @@ export class MainComponent implements OnInit, OnDestroy {
         };
         this.restService.call(request).subscribe({
             next: result => {
+                this.loading = false;
                 this.refreshPage();
                 this.alert.success(this.translate.instant('i18n.successupdate'));
             },

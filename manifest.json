@@ -3,32 +3,32 @@
    "title": [
       {
          "lang": "en",
-         "text": "Title Sequence Number Lookup"
+         "text": "Title Sequence Number Lookup and Call No Enhancement"
       },
       {
          "lang": "zh",
-         "text": "种次号查找"
+         "text": "生成种次号并完善索书号"
       }
    ],
    "subtitle": [
       {
          "lang": "en",
-         "text": "Title Sequence Number Lookup"
+         "text": "Title Sequence Number Lookup and Call No Enhancement"
       },
       {
          "lang": "zh",
-         "text": "种次号查找"
+         "text": "生成种次号并完善索书号"
       }
    ],
    "author": "Metadata HangZhou Co.Ltd.",
    "description": [
       {
          "lang": "en",
-         "text": "Lookup sequence number from external table via API and create call number if the call number doesn't exist yet."
+         "text": "Look up title sequence number via external API and enhance the call number field based on this cloud App configuration."
       },
       {
          "lang": "zh",
-         "text": "通过API从外部表查找种次号，如果索书号不存在，则创建索书号。"
+         "text": "通过外部API获取书目种次号，并根据本App的配置生成和完善书目索书号字段及子字段信息。"
       }
    ],
    "entities": [
