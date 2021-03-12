@@ -215,13 +215,13 @@ export class MainComponent implements OnInit, OnDestroy {
                 outsubfield.textContent = code.split("/")[0]
                 this.fetch_z311(code).then((res: any) => {
                     datafield995.innerHTML = '';
-                    // if (this.settings.institution != '' && this.settings.institutionType != '') {
-                    //     const template = `<subfield code=${this.settings.institutionType}>${this.settings.institution}</subfield>`;
-                    //     let tempNode = document.createElementNS("", 'div');
-                    //     tempNode.innerHTML = template;
-                    //     let frag = tempNode.firstChild;
-                    //     datafield995.appendChild(frag)
-                    // }
+                    if (this.settings.institution != '' && this.settings.institutionType != '') {
+                        const template = `<subfield code=${this.settings.institutionType}>${this.settings.institution}</subfield>`;
+                        let tempNode = document.createElementNS("", 'div');
+                        tempNode.innerHTML = template;
+                        let frag = tempNode.firstChild;
+                        datafield995.appendChild(frag)
+                    }
 
                     if (code) {
                         const template = `<subfield code=${this.settings.classificationNumber}>${code}</subfield>`;
