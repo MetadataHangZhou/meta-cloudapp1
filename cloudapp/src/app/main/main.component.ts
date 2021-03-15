@@ -95,8 +95,12 @@ export class MainComponent implements OnInit, OnDestroy {
 
     saved() {
         this.show = !this.show;
-        this.settingsService.set(this.settings).subscribe(response => console.log("saved"));
-        this.alert.success(this.translate.instant('i18n.savedate'));
+        if( this.settings.holding && this.settings.classificationNumber && this.settings.titleNumber && this.settings.callNo){
+            this.settingsService.set(this.settings).subscribe(response => console.log("saved"));
+            this.alert.success(this.translate.instant('i18n.savedate'));
+        }else{
+            this.alert.error(this.translate.instant('i18n.errortip'));
+        }
     }
 
     getSettings() {
