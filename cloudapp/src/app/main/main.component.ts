@@ -283,21 +283,21 @@ export class MainComponent implements OnInit, OnDestroy {
 
     fetch_z311(key: string) {
         return new Promise((resolve, reject) => {
-            // this.http.get(this.settings.lookupUrl.replace("KEY", key), {
-            //     headers: {
-            //         'X-Proxy-Host': 'http://aleph20.exlibris.com.cn:8992',
-            //         'Authorization': 'Bearer eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJFeGxDbG91ZEFwcDohfmV4bGlicmlzZ3JvdXAvYWxtYS1zY2hlZHVsZXIiLCJzdWIiOiJqb3NodyIsImluc3RfY29kZSI6IlRSX0lOVEVHUkFUSU9OX0lOU1QiLCJ1cmxzIjp7ImFsbWEiOiJodHRwczovL2xvY2FsaG9zdDo0MjAxLyJ9LCJleHAiOjE2MTI3MDM4OTh9.ShNF9FLMJzF5IZEClL1P0QjtSNo57WH0ZY4yQKKzxhl0l93tNxQFxQa-m2E1EX9AjmFNb5-v98yOhCmLM1wNewelxcd2uIAxhvMNoQFl3tQr8Iq7Jt5KyaN6iG2w8gMSxRwj2OQ8xeTqpZM2dnDZKEJMCd3397quExzjLSbYInf4MgFQKyw4i532S7L3rEVg2oQt72_qJnZboULci027oZsfIg9MshkyoCiIw04fcV26jC8JD-pRRNrs3qqfFCyAnlbIBt_oXr32BTTebg1IzNT41ezCf77FyBMY0oKVFzeisn-Jo2iSIxRBjJ8nrgqsvG8XgxbwCwFevnU-hHZIZQ'
-            //     }
-            // }).subscribe(function (data) {
-            //     this.loading = false;
-            //     console.log(data)
-            //     resolve(data)
-            // }, error => {
-            //     this.loading = false;
-            //     this.alert.error(this.translate.instant('i18n.error', {url: this.settings.lookupUrl}));
-            //     reject(error)
-            // })
-            resolve({seq: 7})
+            this.http.get(this.settings.lookupUrl.replace("KEY", key), {
+                headers: {
+                    'X-Proxy-Host': 'http://aleph20.exlibris.com.cn:8992',
+                    'Authorization': 'Bearer eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJFeGxDbG91ZEFwcDohfmV4bGlicmlzZ3JvdXAvYWxtYS1zY2hlZHVsZXIiLCJzdWIiOiJqb3NodyIsImluc3RfY29kZSI6IlRSX0lOVEVHUkFUSU9OX0lOU1QiLCJ1cmxzIjp7ImFsbWEiOiJodHRwczovL2xvY2FsaG9zdDo0MjAxLyJ9LCJleHAiOjE2MTI3MDM4OTh9.ShNF9FLMJzF5IZEClL1P0QjtSNo57WH0ZY4yQKKzxhl0l93tNxQFxQa-m2E1EX9AjmFNb5-v98yOhCmLM1wNewelxcd2uIAxhvMNoQFl3tQr8Iq7Jt5KyaN6iG2w8gMSxRwj2OQ8xeTqpZM2dnDZKEJMCd3397quExzjLSbYInf4MgFQKyw4i532S7L3rEVg2oQt72_qJnZboULci027oZsfIg9MshkyoCiIw04fcV26jC8JD-pRRNrs3qqfFCyAnlbIBt_oXr32BTTebg1IzNT41ezCf77FyBMY0oKVFzeisn-Jo2iSIxRBjJ8nrgqsvG8XgxbwCwFevnU-hHZIZQ'
+                }
+            }).subscribe(function (data) {
+                this.loading = false;
+                // console.log(data)
+                resolve(data)
+            }, error => {
+                this.loading = false;
+                this.alert.error(this.translate.instant('i18n.error', {url: this.settings.lookupUrl}));
+                reject(error)
+            })
+            // resolve({seq: 7})
         })
 
     }
