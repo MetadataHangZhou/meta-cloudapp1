@@ -205,7 +205,7 @@ export class MainComponent implements OnInit, OnDestroy {
                     value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
 
                     // console.log(value)
-                    if( this.settings.titleNumber && this.settings.callNo){
+                    if( this.settings.holding && this.settings.classificationNumber && this.settings.titleNumber && this.settings.callNo){
                         this.updateAnies(value.anies[0]);
                     }else{
                         this.alert.error(this.translate.instant('i18n.errortip'));
@@ -265,7 +265,7 @@ export class MainComponent implements OnInit, OnDestroy {
                     value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
 
                     // console.log(value)
-                    if(this.settings.classificationNumber && this.settings.titleNumber && this.settings.callNo){
+                    if(this.settings.holding && this.settings.classificationNumber && this.settings.titleNumber && this.settings.callNo){
                         this.updateAnies(value.anies[0]);
                     }else{
                         this.alert.error(this.translate.instant('i18n.errortip'));

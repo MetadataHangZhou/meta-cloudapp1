@@ -26,6 +26,6 @@
     "savedate": "Saved",
     "rebuilderror": "Failed ，No Classification number！",
     "error": "Failed,Unauthorized link : {{url}}",
-    "errortip": "Classification number subfield、Subfield of species number and Call number subfield cannot be null！"
+    "errortip": "Collection field、Classification number subfield、Subfield of species number and Call number subfield cannot be null！"
   }
 }
