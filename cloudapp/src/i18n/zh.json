@@ -1,16 +1,5 @@
 {
   "i18n": {
-    "IllegalParameter": "非法参数",
-    "NotAllowUpdate": "已接收的订单行不允许修改",
-    "NoPoLineTip": "请导航到订单行",
-    "Update": "修改",
-    "UpdateDesc": "订单行修正将创建新的订单行,并关闭原有订单行",
-    "UpdatePoLine": "修改订单行",
-    "Currency": "币种",
-    "Vendor": "书商",
-    "Fund": "经费",
-    "UpdateSuccess": "更新成功，已生成新的订单行POL [{{number}}]!",
-    "UpdateConfirm": "是否要关闭当前订单行,并创建新的订单行?",
     "Config": "配置",
     "UserCode": "用户代码",
     "UserCodefile" : "用户代码子字段",
@@ -36,6 +25,7 @@
     "save": "保存",
     "savedate": "已保存",
     "rebuilderror": "无分类号，无法生成！",
-    "error": "获取失败,链接未授权:{{url}}"
+    "error": "获取失败,链接未授权:{{url}}",
+    "errortip": "分类号子字段、种次号子字段和索书号子字段不可为空！"
   }
 }
