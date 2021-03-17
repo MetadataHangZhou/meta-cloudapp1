@@ -3,21 +3,21 @@
    "title": [
       {
          "lang": "en",
-         "text": "Title Sequence Number Lookup and Call No Enhancement"
+         "text": "Call Number Generation Assitant"
       },
       {
          "lang": "zh",
-         "text": "生成种次号并完善索书号"
+         "text": "索书号生成小助手"
       }
    ],
    "subtitle": [
       {
          "lang": "en",
-         "text": "Title Sequence Number Lookup and Call No Enhancement"
+         "text": "Call Number Generation Assitant"
       },
       {
          "lang": "zh",
-         "text": "生成种次号并完善索书号"
+         "text": "索书号生成小助手"
       }
    ],
    "author": "Metadata HangZhou Co.Ltd.",
@@ -43,7 +43,9 @@
       "open": false
    },
    "contentSecurity": {
-      "connectSrc": [],
+      "connectSrc": [
+         "https://api.exldevnetwork.net.cn"
+      ],
       "sandbox": {
          "popups": true,
          "modals": true

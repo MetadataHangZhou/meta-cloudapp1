@@ -8,7 +8,7 @@ import { MaterialModule, getTranslateModule, AlertModule } from '@exlibris/exl-c
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { MainComponent } from './main/main.component';
-import {FormsModule} from "@angular/forms";
+import {FormsModule,ReactiveFormsModule} from "@angular/forms";
 
 @NgModule({
   declarations: [
@@ -24,6 +24,7 @@ import {FormsModule} from "@angular/forms";
         AlertModule,
         getTranslateModule(),
         FormsModule,
+        ReactiveFormsModule
     ],
   providers: [
     { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'standard' } },

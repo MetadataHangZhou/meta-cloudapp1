@@ -1,11 +1,11 @@
 import {Subscription} from 'rxjs';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {Component, OnInit, OnDestroy, NgModule} from '@angular/core';
 import {HttpClientModule, HttpClient} from '@angular/common/http'
 import {TranslateService} from '@ngx-translate/core';
 import {
     CloudAppRestService, CloudAppEventsService, Request, HttpMethod,
-    Entity, PageInfo, RestErrorResponse, AlertService, CloudAppSettingsService, EntityType
+    Entity, PageInfo, RestErrorResponse, AlertService, CloudAppSettingsService, EntityType, FormGroupUtil
 } from '@exlibris/exl-cloudapp-angular-lib';
 
 @Component({
@@ -18,9 +18,13 @@ import {
 })
 export class MainComponent implements OnInit, OnDestroy {
 
+    form: FormGroup;
+    saving = false;
+
     private pageLoad$: Subscription;
     pageEntities: Entity[];
     private _apiResult: any;
+    private name :String = '';
     hasApiResult: boolean = false;
     show: boolean = false;
     choosebt: boolean = false;
@@ -30,7 +34,7 @@ export class MainComponent implements OnInit, OnDestroy {
         institution: '211030',
         institutionType: 'a',
         holding: '905',
-        lookupUrl: 'https://api.exldevnetwork.net.cn/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY',
+        lookupUrl: '/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY',
         lookupPrefix: '',
         classificationNumber: 'd',
         titleNumber: 'e',
@@ -87,6 +91,7 @@ export class MainComponent implements OnInit, OnDestroy {
     setSettings(value: any) {
         this.loading = true;
         this.choosebt = value;
+        this.settings = this.form.value
         this.settingsService.set(this.settings).subscribe(response => this.updateBib(this.apiResult));
         // console.log(this.apiResult)
         // this.updateBib(this.apiResult)
@@ -94,9 +99,15 @@ export class MainComponent implements OnInit, OnDestroy {
     }
 
     saved() {
+        this.settings = this.form.value
         if( this.settings.holding && this.settings.classificationNumber && this.settings.titleNumber && this.settings.callNo){
             this.show = !this.show;
-            this.settingsService.set(this.settings).subscribe(response => console.log("saved"));
+            // this.saving = true;
+            // this.settingsService.set(this.settings).subscribe(response =>
+            //     console.log("Saved"));
+            // this.form.markAsPristine();
+            this.settingsService.set(this.settings).subscribe(response =>
+                console.log("Saved"));
             this.alert.success(this.translate.instant('i18n.savedate'));
         }else{
             this.alert.error(this.translate.instant('i18n.errortip'));
@@ -106,8 +117,9 @@ export class MainComponent implements OnInit, OnDestroy {
 
     getSettings() {
         this.settingsService.get().subscribe(settings => {
-            this.setDefaultValue(settings);
-
+            // this.settings = settings as Settings;
+            // this.setDefaultValue(settings);
+            this.form = FormGroupUtil.toFormGroup(Object.assign(new Settings(), settings))
         });
 
     }
@@ -301,20 +313,26 @@ export class MainComponent implements OnInit, OnDestroy {
 
     fetch_z311(key: string) {
         return new Promise((resolve, reject) => {
-            this.http.get(this.settings.lookupUrl.replace("KEY", key), {
-                headers: {
-                    'X-Proxy-Host': 'http://aleph20.exlibris.com.cn:8992',
-                    'Authorization': 'Bearer eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJFeGxDbG91ZEFwcDohfmV4bGlicmlzZ3JvdXAvYWxtYS1zY2hlZHVsZXIiLCJzdWIiOiJqb3NodyIsImluc3RfY29kZSI6IlRSX0lOVEVHUkFUSU9OX0lOU1QiLCJ1cmxzIjp7ImFsbWEiOiJodHRwczovL2xvY2FsaG9zdDo0MjAxLyJ9LCJleHAiOjE2MTI3MDM4OTh9.ShNF9FLMJzF5IZEClL1P0QjtSNo57WH0ZY4yQKKzxhl0l93tNxQFxQa-m2E1EX9AjmFNb5-v98yOhCmLM1wNewelxcd2uIAxhvMNoQFl3tQr8Iq7Jt5KyaN6iG2w8gMSxRwj2OQ8xeTqpZM2dnDZKEJMCd3397quExzjLSbYInf4MgFQKyw4i532S7L3rEVg2oQt72_qJnZboULci027oZsfIg9MshkyoCiIw04fcV26jC8JD-pRRNrs3qqfFCyAnlbIBt_oXr32BTTebg1IzNT41ezCf77FyBMY0oKVFzeisn-Jo2iSIxRBjJ8nrgqsvG8XgxbwCwFevnU-hHZIZQ'
+            this.eventsService.getAuthToken().subscribe(
+                data => {
+                    console.log(data)
+                    this.http.get("https://api.exldevnetwork.net.cn"+this.settings.lookupUrl.replace("KEY", key), {
+                        headers: {
+                            'X-Proxy-Host': 'http://aleph20.exlibris.com.cn:8992',
+                            'Authorization': 'Bearer '+data
+                        }
+                    }).subscribe(function (data) {
+                        this.loading = false;
+                        // console.log(data)
+                        resolve(data)
+                    }, error => {
+                        this.loading = false;
+                        this.alert.error(this.translate.instant('i18n.error', {url: "https://api.exldevnetwork.net.cn"+this.settings.lookupUrl.replace("KEY", key)}));
+                        reject(error)
+                    })
                 }
-            }).subscribe(function (data) {
-                this.loading = false;
-                // console.log(data)
-                resolve(data)
-            }, error => {
-                this.loading = false;
-                this.alert.error(this.translate.instant('i18n.error', {url: this.settings.lookupUrl}));
-                reject(error)
-            })
+            );
+
             // resolve({seq: 7})
         })
 
@@ -457,7 +475,7 @@ export class MainComponent implements OnInit, OnDestroy {
         if (settings.lookupUrl) {
             this.settings.lookupUrl = settings.lookupUrl
         } else {
-            this.settings.lookupUrl = 'https://api.exldevnetwork.net.cn/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY'
+            this.settings.lookupUrl = '/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY'
         }
         if (settings.lookupPrefix) {
             this.settings.lookupPrefix = settings.lookupPrefix
@@ -481,4 +499,15 @@ export class MainComponent implements OnInit, OnDestroy {
         }
     }
 
+}
+
+ export class Settings {
+     institution:String = '211030';
+     institutionType:String = 'a';
+     holding:String = '905';
+     lookupUrl:String = '/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY';
+     lookupPrefix:String ='';
+     classificationNumber:String = 'd';
+     titleNumber:String = 'e';
+     callNo:String = 's';
 }
