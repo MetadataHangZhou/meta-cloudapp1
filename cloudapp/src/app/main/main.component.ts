@@ -7,6 +7,7 @@ import {
     CloudAppRestService, CloudAppEventsService, Request, HttpMethod,
     Entity, PageInfo, RestErrorResponse, AlertService, CloudAppSettingsService, EntityType, FormGroupUtil
 } from '@exlibris/exl-cloudapp-angular-lib';
+import { Settings } from '../models/settings';
 
 @Component({
     selector: 'app-main',
@@ -102,12 +103,14 @@ export class MainComponent implements OnInit, OnDestroy {
         this.settings = this.form.value
         if( this.settings.holding && this.settings.classificationNumber && this.settings.titleNumber && this.settings.callNo){
             this.show = !this.show;
-            // this.saving = true;
-            // this.settingsService.set(this.settings).subscribe(response =>
-            //     console.log("Saved"));
-            // this.form.markAsPristine();
             this.settingsService.set(this.settings).subscribe(response =>
-                console.log("Saved"));
+                    response => {
+                        console.log("Saved")
+                        this.form.markAsPristine();
+                    },
+                err => this.alert.error(err.message),
+                ()  => this.saving = false
+            );
             this.alert.success(this.translate.instant('i18n.savedate'));
         }else{
             this.alert.error(this.translate.instant('i18n.errortip'));
@@ -183,53 +186,124 @@ export class MainComponent implements OnInit, OnDestroy {
             if (this.choosebt) {
                 let seq;
                 outsubfield.textContent = code.split("/")[0]
-                this.fetch_z311(code).then((res: any) => {
-                    seq = res.seq
-                    if (!eoutsubfield) {
-                        if (datafield995 && seq) {
-                            const template = `<subfield code=${this.settings.titleNumber}>${seq}</subfield>`;
-                            let tempNode = document.createElementNS('', 'div');
-                            tempNode.innerHTML = template;
-                            let frag = tempNode.firstChild;
-                            datafield995.appendChild(frag)
+                if(!eoutsubfield || !ecode){
+                    this.fetch_z311(code).then((res: any) => {
+                        seq = res.seq
+                            if (datafield995 && seq) {
+                                const template = `<subfield code=${this.settings.titleNumber}>${seq}</subfield>`;
+                                let tempNode = document.createElementNS('', 'div');
+                                tempNode.innerHTML = template;
+                                let frag = tempNode.firstChild;
+                                datafield995.appendChild(frag)
+                            }
+
+                        // datafield995.removeChild(eoutsubfield)
+                        // datafield995.removeChild(soutsubfield)
+
+                        if (!soutsubfield) {
+                            if (datafield995 && code && seq) {
+                                const template = `<subfield code=${this.settings.callNo}>${code}/${seq}</subfield>`;
+                                let tempNode = document.createElementNS("", 'div');
+                                tempNode.innerHTML = template;
+                                let frag = tempNode.firstChild;
+                                datafield995.appendChild(frag)
+                            }
+                        } else {
+                            if (code && seq) {
+                                soutsubfield.textContent = `${code}/${seq}`
+                            }
                         }
-                    } else {
-                        if (seq) {
-                            eoutsubfield.textContent = seq;
+                        this.sortlist(datafield995)
+                        // console.log(datafield995)
 
+                        value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
+
+                        // console.log(value)
+                        if( this.settings.holding && this.settings.classificationNumber && this.settings.titleNumber && this.settings.callNo){
+                            this.updateAnies(value.anies[0]);
+                        }else{
+                            this.loading = false;
+                            this.alert.error(this.translate.instant('i18n.errortip'));
+                            this.setDefaultValue(this.settings);
                         }
-                    }
+                    })
+                }else{
+                    eoutsubfield.textContent = `${ecode}`;
 
-                    // datafield995.removeChild(eoutsubfield)
-                    // datafield995.removeChild(soutsubfield)
-
-                    if (!soutsubfield) {
-                        if (datafield995 && code && seq) {
-                            const template = `<subfield code=${this.settings.callNo}>${code}/${seq}</subfield>`;
-                            let tempNode = document.createElementNS("", 'div');
-                            tempNode.innerHTML = template;
-                            let frag = tempNode.firstChild;
-                            datafield995.appendChild(frag)
+                        if (!soutsubfield) {
+                            if (datafield995 && code && ecode) {
+                                const template = `<subfield code=${this.settings.callNo}>${code}/${ecode}</subfield>`;
+                                let tempNode = document.createElementNS("", 'div');
+                                tempNode.innerHTML = template;
+                                let frag = tempNode.firstChild;
+                                datafield995.appendChild(frag)
+                            }
+                        } else {
+                            if (code && ecode) {
+                                soutsubfield.textContent = `${code}/${ecode}`
+                            }
                         }
-                    } else {
-                        if (code && seq) {
-                            soutsubfield.textContent = `${code}/${seq}`
+                        this.sortlist(datafield995)
+
+                        value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
+
+                        if( this.settings.holding && this.settings.classificationNumber && this.settings.titleNumber && this.settings.callNo){
+                            this.updateAnies(value.anies[0]);
+                        }else{
+                            this.loading = false;
+                            this.alert.error(this.translate.instant('i18n.errortip'));
+                            this.setDefaultValue(this.settings);
                         }
-                    }
-                    this.sortlist(datafield995)
-                    // console.log(datafield995)
+                }
 
-                    value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
+                // this.fetch_z311(code).then((res: any) => {
+                //     seq = res.seq
+                //     if (!eoutsubfield) {
+                //         if (datafield995 && seq) {
+                //             const template = `<subfield code=${this.settings.titleNumber}>${seq}</subfield>`;
+                //             let tempNode = document.createElementNS('', 'div');
+                //             tempNode.innerHTML = template;
+                //             let frag = tempNode.firstChild;
+                //             datafield995.appendChild(frag)
+                //         }
+                //     } else {
+                //         if (seq) {
+                //             eoutsubfield.textContent = seq;
+                //
+                //         }
+                //     }
+                //
+                //     // datafield995.removeChild(eoutsubfield)
+                //     // datafield995.removeChild(soutsubfield)
+                //
+                //     if (!soutsubfield) {
+                //         if (datafield995 && code && seq) {
+                //             const template = `<subfield code=${this.settings.callNo}>${code}/${seq}</subfield>`;
+                //             let tempNode = document.createElementNS("", 'div');
+                //             tempNode.innerHTML = template;
+                //             let frag = tempNode.firstChild;
+                //             datafield995.appendChild(frag)
+                //         }
+                //     } else {
+                //         if (code && seq) {
+                //             soutsubfield.textContent = `${code}/${seq}`
+                //         }
+                //     }
+                //     this.sortlist(datafield995)
+                //     // console.log(datafield995)
+                //
+                //     value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
+                //
+                //     // console.log(value)
+                //     if( this.settings.holding && this.settings.classificationNumber && this.settings.titleNumber && this.settings.callNo){
+                //         this.updateAnies(value.anies[0]);
+                //     }else{
+                //         this.loading = false;
+                //         this.alert.error(this.translate.instant('i18n.errortip'));
+                //         this.setDefaultValue(this.settings);
+                //     }
+                // })
 
-                    // console.log(value)
-                    if( this.settings.holding && this.settings.classificationNumber && this.settings.titleNumber && this.settings.callNo){
-                        this.updateAnies(value.anies[0]);
-                    }else{
-                        this.loading = false;
-                        this.alert.error(this.translate.instant('i18n.errortip'));
-                        this.setDefaultValue(this.settings);
-                    }
-                })
             } else {
                 if (!code) {
                     this.loading = false;
@@ -315,7 +389,7 @@ export class MainComponent implements OnInit, OnDestroy {
         return new Promise((resolve, reject) => {
             this.eventsService.getAuthToken().subscribe(
                 data => {
-                    console.log(data)
+                    // console.log(data)
                     this.http.get("https://api.exldevnetwork.net.cn"+this.settings.lookupUrl.replace("KEY", key), {
                         headers: {
                             'X-Proxy-Host': 'http://aleph20.exlibris.com.cn:8992',
@@ -458,56 +532,45 @@ export class MainComponent implements OnInit, OnDestroy {
 
     setDefaultValue(settings: any) {
         if (settings.institution) {
-            this.settings.institution = settings.institution
+            this.form.value.institution = settings.institution
         } else {
-            this.settings.institution = '211030'
+            this.form.value.institution = '211030'
         }
         if (settings.institutionType) {
-            this.settings.institutionType = settings.institutionType
+            this.form.value.institutionType = settings.institutionType
         } else {
-            this.settings.institutionType = 'a'
+            this.form.value.institutionType = 'a'
         }
         if (settings.holding) {
-            this.settings.holding = settings.holding
+            this.form.value.holding = settings.holding
         } else {
-            this.settings.holding = '905'
+            this.form.value.holding = '905'
         }
         if (settings.lookupUrl) {
-            this.settings.lookupUrl = settings.lookupUrl
+            this.form.value.lookupUrl = settings.lookupUrl
         } else {
-            this.settings.lookupUrl = '/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY'
+            this.form.value.lookupUrl = '/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY'
         }
         if (settings.lookupPrefix) {
-            this.settings.lookupPrefix = settings.lookupPrefix
+            this.form.value.lookupPrefix = settings.lookupPrefix
         } else {
-            this.settings.lookupPrefix = ''
+            this.form.value.lookupPrefix = ''
         }
         if (settings.classificationNumber) {
-            this.settings.classificationNumber = settings.classificationNumber
+            this.form.value.classificationNumber = settings.classificationNumber
         } else {
-            this.settings.classificationNumber = 'd'
+            this.form.value.classificationNumber = 'd'
         }
         if (settings.titleNumber) {
-            this.settings.titleNumber = settings.titleNumber
+            this.form.value.titleNumber = settings.titleNumber
         } else {
-            this.settings.titleNumber = 'e'
+            this.form.value.titleNumber = 'e'
         }
         if (settings.callNo) {
-            this.settings.callNo = settings.callNo
+            this.form.value.callNo = settings.callNo
         } else {
-            this.settings.callNo = 's'
+            this.form.value.callNo = 's'
         }
     }
 
-}
-
- export class Settings {
-     institution:String = '211030';
-     institutionType:String = 'a';
-     holding:String = '905';
-     lookupUrl:String = '/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY';
-     lookupPrefix:String ='';
-     classificationNumber:String = 'd';
-     titleNumber:String = 'e';
-     callNo:String = 's';
 }

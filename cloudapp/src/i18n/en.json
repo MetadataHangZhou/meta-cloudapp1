@@ -1,17 +1,17 @@
 {
   "i18n": {
     "Config": "Config",
-    "UserCode": "The user code",
-    "UserCodefile" : "User code field",
-    "Collectionfield": "Collection field",
-    "CallNumberEnquiry": "Call Number Enquiry URL",
-    "CallNumberQueryType": "Call number query type",
+    "UserCode": "Institution code",
+    "UserCodefile" : "Institution code field",
+    "Collectionfield": "Holding field",
+    "CallNumberEnquiry": "Call-no lookup URL",
+    "CallNumberQueryType": "Call-no loopup prefix",
     "ClassificationNumberSubfield": "Classification number subfield",
-    "SubfieldOfSpeciesNumber": "Subfield of species number",
-    "CallNumberSubfield": "Call number subfield",
+    "SubfieldOfSpeciesNumber": "Title number subfield",
+    "CallNumberSubfield": "Call-no subfield",
     "Rebuild": "Rebuild",
     "Update": "Update",
-    "rebuildorupdateerrortip":"This collection field is not available, please rebuild it !",
+    "rebuildorupdateerrortip":"This Holding field is not available, please rebuild it !",
     "errorupdate": "Failed to update data",
     "successupdate": "Success to update data",
     "errorrefreshpage":"Failed to refresh page",
@@ -26,6 +26,6 @@
     "savedate": "Saved",
     "rebuilderror": "Failed ，No Classification number！",
     "error": "Failed,Unauthorized link : {{url}}",
-    "errortip": "Collection field、Classification number subfield、Subfield of species number and Call number subfield cannot be null！"
+    "errortip": "Holding field、Classification number subfield、Title number subfield and Call-no subfield cannot be null！"
   }
 }

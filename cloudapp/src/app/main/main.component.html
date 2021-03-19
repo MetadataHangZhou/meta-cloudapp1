@@ -23,11 +23,11 @@
                 <mat-form-field class="example-full-width" >
                     <mat-label>{{'i18n.UserCode'|translate}}</mat-label>
                     <!--[value]="form.value.institution"-->
-                    <input matInput [ngModel]="form.value.institution"  formControlName="institution">
+                    <input matInput [value]="form.value.institution" formControlName="institution">
                 </mat-form-field>
                 <mat-form-field class="example-full-width">
                     <mat-label>{{'i18n.CallNumberEnquiry'|translate}}</mat-label>
-                    <input matInput [ngModel]="form.value.lookupUrl"  formControlName="lookupUrl">
+                    <input matInput [value]="form.value.lookupUrl"  formControlName="lookupUrl">
                 </mat-form-field>
                 <!--<mat-form-field class="example-full-width">-->
                 <!--<mat-label>{{'i18n.CallNumberQueryType'|translate}}</mat-label>-->
@@ -37,29 +37,29 @@
                     <mat-label>{{'i18n.Collectionfield'|translate}}
                         <span style="color: red">*</span>
                     </mat-label>
-                    <input matInput [ngModel]="form.value.holding"  formControlName="holding" maxlength="3">
+                    <input matInput [value]="form.value.holding"  formControlName="holding" maxlength="3">
                 </mat-form-field>
                 <mat-form-field class="example-full-width">
                     <mat-label>{{'i18n.UserCodefile'|translate}}（$）</mat-label>
-                    <input matInput [ngModel]="form.value.institutionType"  formControlName="institutionType" maxlength="1">
+                    <input matInput [value]="form.value.institutionType"  formControlName="institutionType" maxlength="1">
                 </mat-form-field>
                 <mat-form-field class="example-full-width">
                     <mat-label>{{'i18n.ClassificationNumberSubfield'|translate}}（$）
                         <span style="color: red">*</span>
                     </mat-label>
-                    <input matInput [ngModel]="form.value.classificationNumber"  formControlName="classificationNumber" maxlength="1">
+                    <input matInput [value]="form.value.classificationNumber"  formControlName="classificationNumber" maxlength="1">
                 </mat-form-field>
                 <mat-form-field class="example-full-width">
                     <mat-label>{{'i18n.SubfieldOfSpeciesNumber'|translate}}（$）
                         <span style="color: red">*</span>
                     </mat-label>
-                    <input matInput [ngModel]="form.value.titleNumber"  formControlName="titleNumber" maxlength="1">
+                    <input matInput [value]="form.value.titleNumber"  formControlName="titleNumber" maxlength="1">
                 </mat-form-field>
                 <mat-form-field class="example-full-width">
                     <mat-label>{{'i18n.CallNumberSubfield'|translate}}（$）
                         <span style="color: red">*</span>
                     </mat-label>
-                    <input matInput [ngModel]="form.value.callNo"  formControlName="callNo" maxlength="1">
+                    <input matInput [value]="form.value.callNo"  formControlName="callNo" maxlength="1">
                 </mat-form-field>
             </mat-card-content>
             <button mat-raised-button color="primary" (click)="saved()" [disabled]="!hasApiResult || loading"
