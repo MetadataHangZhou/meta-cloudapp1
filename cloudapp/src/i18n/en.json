@@ -26,6 +26,9 @@
     "savedate": "Saved",
     "rebuilderror": "Failed ，No Classification number！",
     "error": "Failed : {{url}}",
-    "errortip": "Holding field、Classification number subfield、Title number subfield and Call-no subfield cannot be null！"
+    "errortip": "Holding field、Classification number subfield、Title number subfield and Call-no subfield cannot be null！",
+    "subfieldsize": "Title number length",
+    "zero": "No-leading zero",
+    "digits": "digits"
   }
 }

@@ -1,5 +1,5 @@
 <section>
-    <section *ngIf="!show" >
+    <section *ngIf="!show">
         <div style="text-align: right">
             <button mat-raised-button color="primary" (click)="showConfig()"><img src="../assets/config.png"></button>
         </div>
@@ -16,18 +16,18 @@
 <section *ngIf="show">
     <form [formGroup]="form">
         <mat-card class="example-card">
-            <mat-card-header >
+            <mat-card-header>
                 <mat-card-title>{{'i18n.Config'|translate}}</mat-card-title>
             </mat-card-header>
-            <mat-card-content >
-                <mat-form-field class="example-full-width" >
+            <mat-card-content>
+                <mat-form-field class="example-full-width">
                     <mat-label>{{'i18n.UserCode'|translate}}</mat-label>
                     <!--[value]="form.value.institution"-->
                     <input matInput [value]="form.value.institution" formControlName="institution">
                 </mat-form-field>
                 <mat-form-field class="example-full-width">
                     <mat-label>{{'i18n.CallNumberEnquiry'|translate}}</mat-label>
-                    <input matInput [value]="form.value.lookupUrl"  formControlName="lookupUrl">
+                    <input matInput [value]="form.value.lookupUrl" formControlName="lookupUrl">
                 </mat-form-field>
                 <!--<mat-form-field class="example-full-width">-->
                 <!--<mat-label>{{'i18n.CallNumberQueryType'|translate}}</mat-label>-->
@@ -37,34 +37,49 @@
                     <mat-label>{{'i18n.Collectionfield'|translate}}
                         <span style="color: red">*</span>
                     </mat-label>
-                    <input matInput [value]="form.value.holding"  formControlName="holding" maxlength="3">
+                    <input matInput [value]="form.value.holding" formControlName="holding" maxlength="3">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>{{'i18n.subfieldsize'|translate}}</mat-label>
+                    <mat-select formControlName="subfieldsize">
+                        <mat-option [value]="0">{{'i18n.zero'|translate}}</mat-option>
+                        <mat-option [value]="3">3 {{'i18n.digits'|translate}}</mat-option>
+                        <mat-option [value]="4">4 {{'i18n.digits'|translate}}</mat-option>
+                        <mat-option [value]="5">5 {{'i18n.digits'|translate}}</mat-option>
+                        <mat-option [value]="6">6 {{'i18n.digits'|translate}}</mat-option>
+                        <!--<mat-option value="option3">Option 3</mat-option>-->
+                    </mat-select>
                 </mat-form-field>
                 <mat-form-field class="example-full-width">
                     <mat-label>{{'i18n.UserCodefile'|translate}}（$）</mat-label>
-                    <input matInput [value]="form.value.institutionType"  formControlName="institutionType" maxlength="1">
+                    <input matInput [value]="form.value.institutionType" formControlName="institutionType"
+                           maxlength="1">
                 </mat-form-field>
                 <mat-form-field class="example-full-width">
                     <mat-label>{{'i18n.ClassificationNumberSubfield'|translate}}（$）
                         <span style="color: red">*</span>
                     </mat-label>
-                    <input matInput [value]="form.value.classificationNumber"  formControlName="classificationNumber" maxlength="1">
+                    <input matInput [value]="form.value.classificationNumber" formControlName="classificationNumber"
+                           maxlength="1">
                 </mat-form-field>
                 <mat-form-field class="example-full-width">
                     <mat-label>{{'i18n.SubfieldOfSpeciesNumber'|translate}}（$）
                         <span style="color: red">*</span>
                     </mat-label>
-                    <input matInput [value]="form.value.titleNumber"  formControlName="titleNumber" maxlength="1">
+                    <input matInput [value]="form.value.titleNumber" formControlName="titleNumber" maxlength="1">
                 </mat-form-field>
                 <mat-form-field class="example-full-width">
                     <mat-label>{{'i18n.CallNumberSubfield'|translate}}（$）
                         <span style="color: red">*</span>
                     </mat-label>
-                    <input matInput [value]="form.value.callNo"  formControlName="callNo" maxlength="1">
+                    <input matInput [value]="form.value.callNo" formControlName="callNo" maxlength="1">
                 </mat-form-field>
+
             </mat-card-content>
             <button mat-raised-button color="primary" (click)="saved()" [disabled]="!hasApiResult || loading"
             >{{'i18n.save'|translate}}</button>
         </mat-card>
+
     </form>
 
 </section>
@@ -79,25 +94,26 @@
     </mat-card>
 </section>
 <section>
-    <button style="margin-right: 10px" mat-raised-button color="primary" (click)="setSettings(true)" [disabled]="!hasApiResult || loading"
+    <button style="margin-right: 10px" mat-raised-button color="primary" (click)="setSettings(true)"
+            [disabled]="!hasApiResult || loading"
     >{{'i18n.Update'|translate}}</button>
-        <button  mat-raised-button color="primary" (click)="setSettings(false)" [disabled]="!hasApiResult || loading"
-        >{{'i18n.Rebuild'|translate}}</button>
+    <button mat-raised-button color="primary" (click)="setSettings(false)" [disabled]="!hasApiResult || loading"
+    >{{'i18n.Rebuild'|translate}}</button>
     <!--<mat-card class="example-card" >-->
-        <!--<mat-card-header>-->
-            <!--<mat-card-title>API Result</mat-card-title>-->
-        <!--</mat-card-header>-->
-        <!--<mat-card-content>-->
-            <!--<textarea #apiResultArea [value]="apiResult | json"></textarea>-->
-        <!--</mat-card-content>-->
-        <!--<mat-card-actions>-->
-            <!--<button mat-raised-button color="primary" (click)="update(apiResultArea.value)"-->
-                    <!--[disabled]="!hasApiResult || loading">重新生成-->
-            <!--</button>-->
-            <!--<button mat-raised-button color="primary" (click)="update(apiResultArea.value)"-->
-                    <!--[disabled]="!hasApiResult || loading">更新-->
-            <!--</button>-->
-        <!--</mat-card-actions>-->
+    <!--<mat-card-header>-->
+    <!--<mat-card-title>API Result</mat-card-title>-->
+    <!--</mat-card-header>-->
+    <!--<mat-card-content>-->
+    <!--<textarea #apiResultArea [value]="apiResult | json"></textarea>-->
+    <!--</mat-card-content>-->
+    <!--<mat-card-actions>-->
+    <!--<button mat-raised-button color="primary" (click)="update(apiResultArea.value)"-->
+    <!--[disabled]="!hasApiResult || loading">重新生成-->
+    <!--</button>-->
+    <!--<button mat-raised-button color="primary" (click)="update(apiResultArea.value)"-->
+    <!--[disabled]="!hasApiResult || loading">更新-->
+    <!--</button>-->
+    <!--</mat-card-actions>-->
     <!--</mat-card>-->
 </section>
 <div class="loading-shade" *ngIf="loading">

@@ -7,4 +7,5 @@ export class Settings {
     classificationNumber:String = 'd';
     titleNumber:String = 'e';
     callNo:String = 's';
+    subfieldsize:String = '0'
 }
