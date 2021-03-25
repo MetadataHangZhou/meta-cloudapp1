@@ -332,7 +332,6 @@ export class MainComponent implements OnInit, OnDestroy {
                         datafield995.appendChild(frag)
                     }
 
-
                     seq = this.repair(res.seq)
 
                     // if(!eoutsubfield) {
@@ -377,8 +376,8 @@ export class MainComponent implements OnInit, OnDestroy {
     repair(value:any){
         let i = 1;
         let zero = '0';
-        if(value.length<this.settings.subfieldsize){
-            while (i < this.settings.subfieldsize - value.length) {
+        if(value.toString().length<this.settings.subfieldsize){
+            while (i < this.settings.subfieldsize - value.toString().length) {
                 zero = zero + '0';
                 i++;
             }
@@ -421,7 +420,7 @@ export class MainComponent implements OnInit, OnDestroy {
                 }
             );
 
-            // resolve({seq: 7})
+            // resolve({seq:"7"})
         })
 
     }
