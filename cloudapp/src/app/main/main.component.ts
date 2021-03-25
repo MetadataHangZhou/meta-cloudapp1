@@ -377,11 +377,11 @@ export class MainComponent implements OnInit, OnDestroy {
     repair(value:any){
         let i = 1;
         let zero = '0';
-        while (i < this.settings.subfieldsize) {
-            zero = zero + '0';
-            i++;
-        }
-        if (zero.length > 1) {
+        if(value.length<this.settings.subfieldsize){
+            while (i < this.settings.subfieldsize - value.length) {
+                zero = zero + '0';
+                i++;
+            }
             value = zero + value
         }
         return value;
