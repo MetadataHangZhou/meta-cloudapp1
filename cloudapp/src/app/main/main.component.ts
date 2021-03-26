@@ -107,15 +107,15 @@ export class MainComponent implements OnInit, OnDestroy {
             this.show = !this.show;
             this.settingsService.set(this.settings).subscribe(response =>
                     response => {
-                        console.log("Saved")
+                        // console.log("Saved")
                         this.form.markAsPristine();
                     },
-                err => this.alert.error(err.message),
+                err => this.alert.error(err.message,{autoClose:true,delay:3000}),
                 () => this.saving = false
             );
             this.alert.success(this.translate.instant('i18n.savedate'));
         } else {
-            this.alert.error(this.translate.instant('i18n.errortip'));
+            this.alert.error(this.translate.instant('i18n.errortip'),{autoClose:true,delay:3000});
             this.setDefaultValue(this.settings);
         }
     }
@@ -183,7 +183,7 @@ export class MainComponent implements OnInit, OnDestroy {
         });
         if (this.choosebt && !this.rebuildorupdate) {
             this.loading = false;
-            this.alert.error(this.translate.instant('i18n.rebuildorupdateerrortip'));
+            this.alert.error(this.translate.instant('i18n.rebuildorupdateerrortip'),{autoClose:true,delay:3000});
         } else {
             if (this.choosebt) {
                 let seq;
@@ -225,7 +225,7 @@ export class MainComponent implements OnInit, OnDestroy {
                             this.updateAnies(value.anies[0]);
                         } else {
                             this.loading = false;
-                            this.alert.error(this.translate.instant('i18n.errortip'));
+                            this.alert.error(this.translate.instant('i18n.errortip'),{autoClose:true,delay:3000});
                             this.setDefaultValue(this.settings);
                         }
                     })
@@ -253,7 +253,7 @@ export class MainComponent implements OnInit, OnDestroy {
                         this.updateAnies(value.anies[0]);
                     } else {
                         this.loading = false;
-                        this.alert.error(this.translate.instant('i18n.errortip'));
+                        this.alert.error(this.translate.instant('i18n.errortip'),{autoClose:true,delay:3000});
                         this.setDefaultValue(this.settings);
                     }
                 }
@@ -309,7 +309,7 @@ export class MainComponent implements OnInit, OnDestroy {
             } else {
                 if (!code) {
                     this.loading = false;
-                    this.alert.error(this.translate.instant('i18n.rebuilderror'));
+                    this.alert.error(this.translate.instant('i18n.rebuilderror'),{autoClose:true,delay:3000});
                 }
                 // let seq = "7"
                 let seq;
@@ -364,7 +364,7 @@ export class MainComponent implements OnInit, OnDestroy {
                         this.updateAnies(value.anies[0]);
                     } else {
                         this.loading = false;
-                        this.alert.error(this.translate.instant('i18n.errortip'));
+                        this.alert.error(this.translate.instant('i18n.errortip'),{autoClose:true,delay:3000});
                         this.setDefaultValue(this.settings);
                     }
 
@@ -421,6 +421,7 @@ export class MainComponent implements OnInit, OnDestroy {
             );
 
             // resolve({seq:"7"})
+            // resolve({seq:Math.ceil(Math.random()*99)})
         })
 
     }
@@ -439,10 +440,10 @@ export class MainComponent implements OnInit, OnDestroy {
             next: result => {
                 this.loading = false;
                 this.refreshPage();
-                this.alert.success(this.translate.instant('i18n.successupdate'));
+                // this.alert.success(this.translate.instant('i18n.successupdate'));
             },
             error: (e: RestErrorResponse) => {
-                this.alert.error(this.translate.instant('i18n.errorupdate'));
+                this.alert.error(this.translate.instant('i18n.errorupdate'),{autoClose:true,delay:3000});
                 // console.error(e);
                 this.loading = false;
             }
@@ -455,7 +456,7 @@ export class MainComponent implements OnInit, OnDestroy {
         let requestBody = this.tryParseJson(value);
         if (!requestBody) {
             this.loading = false;
-            return this.alert.error(this.translate.instant('i18n.errorjson'));
+            return this.alert.error(this.translate.instant('i18n.errorjson'),{autoClose:true,delay:3000});
         }
         this.sendUpdateRequest(requestBody);
     }
@@ -466,7 +467,7 @@ export class MainComponent implements OnInit, OnDestroy {
             next: () => this.alert.success('Success!'),
             error: e => {
                 // console.error(e);
-                this.alert.error(this.translate.instant('i18n.errorrefreshpage'));
+                this.alert.error(this.translate.instant('i18n.errorrefreshpage'),{autoClose:true,delay:3000});
             },
             complete: () => this.loading = false
         });
@@ -527,7 +528,7 @@ export class MainComponent implements OnInit, OnDestroy {
                 this.refreshPage();
             },
             error: (e: RestErrorResponse) => {
-                this.alert.error(this.translate.instant('i18n.errorupdate'));
+                this.alert.error(this.translate.instant('i18n.errorupdate'),{autoClose:true,delay:3000});
                 console.error(e);
                 this.loading = false;
             }
