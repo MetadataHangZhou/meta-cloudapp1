@@ -16,7 +16,7 @@
     "successupdate": "更新数据成功",
     "errorrefreshpage":"刷新页面失败",
     "errorjson": "解析JSON失败",
-    "tip": "请先打开MARC数据!",
+    "tip": "请打开一条书目记录！",
     "rebuildbt": "重新生成：覆盖所有subfield",
     "updatebt": "更新：获取种次号子字段和更新索书号子字段，如果种次号子字段已经存在，则只更新索书号子字段。",
     "tip1": "首次使用请配置字段及子字段",
