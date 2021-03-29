@@ -1,5 +1,5 @@
 {
-   "id": "pol-post-correction",
+   "id": "call_number_assistant",
    "title": [
       {
          "lang": "en",
@@ -30,9 +30,6 @@
          "lang": "zh",
          "text": "通过外部API获取书目种次号，并根据本App的配置生成和完善书目索书号字段及子字段信息。"
       }
-   ],
-   "entities": [
-      "PO_LINE"
    ],
    "icon": {
       "type": "url",

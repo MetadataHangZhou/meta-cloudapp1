@@ -20,7 +20,7 @@ import {Settings} from '../models/settings';
 export class MainComponent implements OnInit, OnDestroy {
 
     form: FormGroup;
-    saving = false;
+    // saving = false;
 
     private pageLoad$: Subscription;
     pageEntities: Entity[];
@@ -31,17 +31,17 @@ export class MainComponent implements OnInit, OnDestroy {
     choosebt: boolean = false;
     rebuildorupdate: boolean = false;
     loading = false;
-    settings: any = {
-        institution: '211030',
-        institutionType: 'a',
-        holding: '905',
-        lookupUrl: '/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY',
-        lookupPrefix: '',
-        classificationNumber: 'd',
-        titleNumber: 'e',
-        callNo: 's',
-        subfieldsize: '0'
-    };
+    // settings: any = {
+    //     institution: '211030',
+    //     institutionType: 'a',
+    //     holding: '905',
+    //     lookupUrl: '/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY',
+    //     lookupPrefix: '',
+    //     classificationNumber: 'd',
+    //     titleNumber: 'e',
+    //     callNo: 's',
+    //     subfieldsize: '0'
+    // };
 
     constructor(private restService: CloudAppRestService,
                 private eventsService: CloudAppEventsService,
@@ -69,7 +69,6 @@ export class MainComponent implements OnInit, OnDestroy {
     }
 
     onPageLoad = (pageInfo: PageInfo) => {
-
         this.pageEntities = pageInfo.entities;
         if ((pageInfo.entities || []).length == 1) {
             const entity = pageInfo.entities[0];
@@ -93,30 +92,40 @@ export class MainComponent implements OnInit, OnDestroy {
     setSettings(value: any) {
         this.loading = true;
         this.choosebt = value;
-        this.settings = this.form.value
-        this.settingsService.set(this.settings).subscribe(response => this.updateBib(this.apiResult));
+        // this.settings = this.form.value
+        // this.settingsService.set(this.form.value).subscribe(response => this.updateBib(this.apiResult));
         // console.log(this.apiResult)
         // this.updateBib(this.apiResult)
+
+        this.settingsService.set(this.form.value).subscribe(
+            response => {
+                // this.alert.success('Settings successfully saved.');
+                this.form.markAsPristine();
+                this.updateBib(this.apiResult)
+            },
+            // err => this.alert.error(err.message),
+            // ()  => this.saving = false
+        );
 
     }
 
     saved() {
-        this.settings = this.form.value
+        // this.settings = this.form.value
 
-        if (this.settings.holding && this.settings.classificationNumber && this.settings.titleNumber && this.settings.callNo) {
+        if (this.form.value.holding && this.form.value.classificationNumber && this.form.value.titleNumber && this.form.value.callNo) {
             this.show = !this.show;
-            this.settingsService.set(this.settings).subscribe(response =>
+            this.settingsService.set(this.form.value).subscribe(response =>
                     response => {
                         // console.log("Saved")
                         this.form.markAsPristine();
                     },
                 err => this.alert.error(err.message,{autoClose:true,delay:3000}),
-                () => this.saving = false
+                // () => this.saving = false
             );
             this.alert.success(this.translate.instant('i18n.savedate'));
         } else {
             this.alert.error(this.translate.instant('i18n.errortip'),{autoClose:true,delay:3000});
-            this.setDefaultValue(this.settings);
+            this.setDefaultValue(this.form.value);
         }
     }
 
@@ -125,6 +134,8 @@ export class MainComponent implements OnInit, OnDestroy {
             // this.settings = settings as Settings;
             // this.setDefaultValue(settings);
             this.form = FormGroupUtil.toFormGroup(Object.assign(new Settings(), settings))
+            // this.form.value = settings as Settings;
+            console.log(this.form)
         });
 
     }
@@ -141,22 +152,22 @@ export class MainComponent implements OnInit, OnDestroy {
         let datafield995;
         Array.from(doc.getElementsByTagName("datafield")).forEach(datafield => {
             //遍历查询当前馆藏字段，若有则进行更新数据，若无则重建数据
-            if (this.settings.holding == datafield.getAttribute("tag")) {
+            if (this.form.value.holding == datafield.getAttribute("tag")) {
                 this.rebuildorupdate = true;
                 // console.log(datafield)
                 datafield995 = datafield;
                 Array.from(datafield.getElementsByTagName("subfield")).forEach(subfield => {
-                    if (this.settings.classificationNumber == subfield.getAttribute("code")) {
+                    if (this.form.value.classificationNumber == subfield.getAttribute("code")) {
                         code = subfield.textContent
                         outsubfield = subfield
                         // console.log(subfield.textContent)
                     }
-                    if (this.settings.titleNumber == subfield.getAttribute("code")) {
+                    if (this.form.value.titleNumber == subfield.getAttribute("code")) {
                         ecode = subfield.textContent
                         eoutsubfield = subfield
                         // console.log(subfield.textContent)
                     }
-                    if (this.settings.callNo == subfield.getAttribute("code")) {
+                    if (this.form.value.callNo == subfield.getAttribute("code")) {
                         scode = subfield.textContent
                         soutsubfield = subfield
                         // console.log(subfield.textContent)
@@ -166,7 +177,7 @@ export class MainComponent implements OnInit, OnDestroy {
                 this.rebuildorupdate = false;
                 if ('690' == datafield.getAttribute("tag")) {
                     datafield995 = datafield.cloneNode();
-                    datafield995.setAttribute("tag", this.settings.holding)
+                    datafield995.setAttribute("tag", this.form.value.holding)
                     // console.log(datafield995)
                     Array.from(datafield.getElementsByTagName("subfield")).forEach(subfield => {
                         if ('a' == subfield.getAttribute("code")) {
@@ -182,8 +193,70 @@ export class MainComponent implements OnInit, OnDestroy {
             }
         });
         if (this.choosebt && !this.rebuildorupdate) {
-            this.loading = false;
-            this.alert.error(this.translate.instant('i18n.rebuildorupdateerrortip'),{autoClose:true,delay:3000});
+            // this.loading = false;
+            // this.alert.error(this.translate.instant('i18n.rebuildorupdateerrortip'),{autoClose:true,delay:3000});
+            if (!code) {
+                this.loading = false;
+                this.alert.error(this.translate.instant('i18n.rebuilderror'),{autoClose:true,delay:3000});
+            }
+            // let seq = "7"
+            let seq;
+            outsubfield.textContent = code.split("/")[0]
+            this.fetch_z311(code).then((res: any) => {
+                datafield995.innerHTML = '';
+                if (this.form.value.institution != '' && this.form.value.institutionType != '') {
+                    const template = `<subfield code=${this.form.value.institutionType}>${this.form.value.institution}</subfield>`;
+                    let tempNode = document.createElementNS("", 'div');
+                    tempNode.innerHTML = template;
+                    let frag = tempNode.firstChild;
+                    datafield995.appendChild(frag)
+                }
+
+                if (code) {
+                    const template = `<subfield code=${this.form.value.classificationNumber}>${code}</subfield>`;
+                    let tempNode = document.createElementNS('', 'div');
+                    tempNode.innerHTML = template;
+                    let frag = tempNode.firstChild;
+                    datafield995.appendChild(frag)
+                }
+
+                seq = this.repair(res.seq)
+
+                // if(!eoutsubfield) {
+                if (datafield995 && seq) {
+                    const template = `<subfield code=${this.form.value.titleNumber}>${seq}</subfield>`;
+                    let tempNode = document.createElementNS('', 'div');
+                    tempNode.innerHTML = template;
+                    let frag = tempNode.firstChild;
+                    datafield995.appendChild(frag)
+                }
+
+                if (datafield995 && code && seq) {
+                    const template = `<subfield code=${this.form.value.callNo}>${code}/${seq}</subfield>`;
+                    let tempNode = document.createElementNS("", 'div');
+                    tempNode.innerHTML = template;
+                    let frag = tempNode.firstChild;
+                    datafield995.appendChild(frag)
+                }
+
+                this.sortlist(datafield995)
+
+                if (this.choosebt) {
+                    doc.documentElement.appendChild(datafield995);
+                }
+                // doc.documentElement.removeChild(datafield995);
+                value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
+
+                // console.log(value)
+                if (this.form.value.holding && this.form.value.classificationNumber && this.form.value.titleNumber && this.form.value.callNo) {
+                    this.updateAnies(value.anies[0]);
+                } else {
+                    this.loading = false;
+                    this.alert.error(this.translate.instant('i18n.errortip'),{autoClose:true,delay:3000});
+                    this.setDefaultValue(this.form.value);
+                }
+
+            })
         } else {
             if (this.choosebt) {
                 let seq;
@@ -192,7 +265,7 @@ export class MainComponent implements OnInit, OnDestroy {
                     this.fetch_z311(code).then((res: any) => {
                         seq = this.repair(res.seq)
                         if (datafield995 && seq) {
-                            const template = `<subfield code=${this.settings.titleNumber}>${seq}</subfield>`;
+                            const template = `<subfield code=${this.form.value.titleNumber}>${seq}</subfield>`;
                             let tempNode = document.createElementNS('', 'div');
                             tempNode.innerHTML = template;
                             let frag = tempNode.firstChild;
@@ -204,7 +277,7 @@ export class MainComponent implements OnInit, OnDestroy {
 
                         if (!soutsubfield) {
                             if (datafield995 && code && seq) {
-                                const template = `<subfield code=${this.settings.callNo}>${code}/${seq}</subfield>`;
+                                const template = `<subfield code=${this.form.value.callNo}>${code}/${seq}</subfield>`;
                                 let tempNode = document.createElementNS("", 'div');
                                 tempNode.innerHTML = template;
                                 let frag = tempNode.firstChild;
@@ -221,12 +294,12 @@ export class MainComponent implements OnInit, OnDestroy {
                         value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
 
                         // console.log(value)
-                        if (this.settings.holding && this.settings.classificationNumber && this.settings.titleNumber && this.settings.callNo) {
+                        if (this.form.value.holding && this.form.value.classificationNumber && this.form.value.titleNumber && this.form.value.callNo) {
                             this.updateAnies(value.anies[0]);
                         } else {
                             this.loading = false;
                             this.alert.error(this.translate.instant('i18n.errortip'),{autoClose:true,delay:3000});
-                            this.setDefaultValue(this.settings);
+                            this.setDefaultValue(this.form.value);
                         }
                     })
                 } else {
@@ -234,7 +307,7 @@ export class MainComponent implements OnInit, OnDestroy {
 
                     if (!soutsubfield) {
                         if (datafield995 && code && ecode) {
-                            const template = `<subfield code=${this.settings.callNo}>${code}/${ecode}</subfield>`;
+                            const template = `<subfield code=${this.form.value.callNo}>${code}/${ecode}</subfield>`;
                             let tempNode = document.createElementNS("", 'div');
                             tempNode.innerHTML = template;
                             let frag = tempNode.firstChild;
@@ -249,12 +322,12 @@ export class MainComponent implements OnInit, OnDestroy {
 
                     value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
 
-                    if (this.settings.holding && this.settings.classificationNumber && this.settings.titleNumber && this.settings.callNo) {
+                    if (this.form.value.holding && this.form.value.classificationNumber && this.form.value.titleNumber && this.form.value.callNo) {
                         this.updateAnies(value.anies[0]);
                     } else {
                         this.loading = false;
                         this.alert.error(this.translate.instant('i18n.errortip'),{autoClose:true,delay:3000});
-                        this.setDefaultValue(this.settings);
+                        this.setDefaultValue(this.form.value);
                     }
                 }
 
@@ -316,8 +389,8 @@ export class MainComponent implements OnInit, OnDestroy {
                 outsubfield.textContent = code.split("/")[0]
                 this.fetch_z311(code).then((res: any) => {
                     datafield995.innerHTML = '';
-                    if (this.settings.institution != '' && this.settings.institutionType != '') {
-                        const template = `<subfield code=${this.settings.institutionType}>${this.settings.institution}</subfield>`;
+                    if (this.form.value.institution != '' && this.form.value.institutionType != '') {
+                        const template = `<subfield code=${this.form.value.institutionType}>${this.form.value.institution}</subfield>`;
                         let tempNode = document.createElementNS("", 'div');
                         tempNode.innerHTML = template;
                         let frag = tempNode.firstChild;
@@ -325,7 +398,7 @@ export class MainComponent implements OnInit, OnDestroy {
                     }
 
                     if (code) {
-                        const template = `<subfield code=${this.settings.classificationNumber}>${code}</subfield>`;
+                        const template = `<subfield code=${this.form.value.classificationNumber}>${code}</subfield>`;
                         let tempNode = document.createElementNS('', 'div');
                         tempNode.innerHTML = template;
                         let frag = tempNode.firstChild;
@@ -336,7 +409,7 @@ export class MainComponent implements OnInit, OnDestroy {
 
                     // if(!eoutsubfield) {
                     if (datafield995 && seq) {
-                        const template = `<subfield code=${this.settings.titleNumber}>${seq}</subfield>`;
+                        const template = `<subfield code=${this.form.value.titleNumber}>${seq}</subfield>`;
                         let tempNode = document.createElementNS('', 'div');
                         tempNode.innerHTML = template;
                         let frag = tempNode.firstChild;
@@ -344,7 +417,7 @@ export class MainComponent implements OnInit, OnDestroy {
                     }
 
                     if (datafield995 && code && seq) {
-                        const template = `<subfield code=${this.settings.callNo}>${code}/${seq}</subfield>`;
+                        const template = `<subfield code=${this.form.value.callNo}>${code}/${seq}</subfield>`;
                         let tempNode = document.createElementNS("", 'div');
                         tempNode.innerHTML = template;
                         let frag = tempNode.firstChild;
@@ -360,12 +433,12 @@ export class MainComponent implements OnInit, OnDestroy {
                     value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
 
                     // console.log(value)
-                    if (this.settings.holding && this.settings.classificationNumber && this.settings.titleNumber && this.settings.callNo) {
+                    if (this.form.value.holding && this.form.value.classificationNumber && this.form.value.titleNumber && this.form.value.callNo) {
                         this.updateAnies(value.anies[0]);
                     } else {
                         this.loading = false;
                         this.alert.error(this.translate.instant('i18n.errortip'),{autoClose:true,delay:3000});
-                        this.setDefaultValue(this.settings);
+                        this.setDefaultValue(this.form.value);
                     }
 
                 })
@@ -376,8 +449,8 @@ export class MainComponent implements OnInit, OnDestroy {
     repair(value:any){
         let i = 1;
         let zero = '0';
-        if(value.toString().length<this.settings.subfieldsize){
-            while (i < this.settings.subfieldsize - value.toString().length) {
+        if(value.toString().length<this.form.value.subfieldsize){
+            while (i < this.form.value.subfieldsize - value.toString().length) {
                 zero = zero + '0';
                 i++;
             }
@@ -403,7 +476,7 @@ export class MainComponent implements OnInit, OnDestroy {
             this.eventsService.getAuthToken().subscribe(
                 data => {
                     // console.log(data)
-                    this.http.get("https://api.exldevnetwork.net.cn" + this.settings.lookupUrl.replace("KEY", key), {
+                    this.http.get("https://api.exldevnetwork.net.cn" + this.form.value.lookupUrl.replace("KEY", key), {
                         headers: {
                             'X-Proxy-Host': 'http://aleph20.exlibris.com.cn:8992',
                             'Authorization': 'Bearer ' + data
@@ -414,7 +487,7 @@ export class MainComponent implements OnInit, OnDestroy {
                         resolve(data)
                     }, error => {
                         this.loading = false;
-                        this.alert.error(this.translate.instant('i18n.error', {url: "https://api.exldevnetwork.net.cn" + this.settings.lookupUrl.replace("KEY", key)}));
+                        this.alert.error(this.translate.instant('i18n.error', {url: "https://api.exldevnetwork.net.cn" + this.form.value.lookupUrl.replace("KEY", key)}));
                         reject(error)
                     })
                 }
@@ -450,16 +523,16 @@ export class MainComponent implements OnInit, OnDestroy {
         });
     }
 
-    update(value: any) {
-        this.loading = true;
-        console.log(value)
-        let requestBody = this.tryParseJson(value);
-        if (!requestBody) {
-            this.loading = false;
-            return this.alert.error(this.translate.instant('i18n.errorjson'),{autoClose:true,delay:3000});
-        }
-        this.sendUpdateRequest(requestBody);
-    }
+    // update(value: any) {
+    //     this.loading = true;
+    //     console.log(value)
+    //     let requestBody = this.tryParseJson(value);
+    //     if (!requestBody) {
+    //         this.loading = false;
+    //         return this.alert.error(this.translate.instant('i18n.errorjson'),{autoClose:true,delay:3000});
+    //     }
+    //     this.sendUpdateRequest(requestBody);
+    // }
 
     refreshPage = () => {
         this.loading = true;
@@ -473,76 +546,57 @@ export class MainComponent implements OnInit, OnDestroy {
         });
     }
 
-    private getData() {
-        // let request: Request = {
-        //   url: '/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=TP312/001',
-        //   method: HttpMethod.GET,
-        //   headers:{
-        //     'X-Proxy-Host':'http://aleph20.exlibris.com.cn:8992'
-        //   }
-        // };
-        // this.restService.call(request).subscribe({
-        //   next: result => {
-        //     console.log(result)
-        //   },
-        //   error: (e: RestErrorResponse) => {
-        //     this.alert.error('Failed to update data');
-        //     console.error(e);
-        //     this.loading = false;
-        //   }
-        // });
-        this.http.get('/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=TP312/001', {
-            headers: {
-                'X-Proxy-Host': 'http://aleph20.exlibris.com.cn:8992'
-            }
-        }).subscribe(function (data) {
-            console.log(data)
-        })
-        // let request: Request = {
-        //   url: 'http://222.128.60.220:8992/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=TP312/001',
-        //   method: HttpMethod.GET
-        // };
-        // this.restService.call(request).subscribe({
-        //   next: result => {
-        //     console.log(result)
-        //     // this.apiResult = result;
-        //     // this.refreshPage();
-        //   },
-        //   error: (e: RestErrorResponse) => {
-        //     this.alert.error('Failed to update data');
-        //     console.error(e);
-        //     this.loading = false;
-        //   }
-        // });
-    }
+    // private getData() {
+    //     // let request: Request = {
+    //     //   url: '/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=TP312/001',
+    //     //   method: HttpMethod.GET,
+    //     //   headers:{
+    //     //     'X-Proxy-Host':'http://aleph20.exlibris.com.cn:8992'
+    //     //   }
+    //     // };
+    //     // this.restService.call(request).subscribe({
+    //     //   next: result => {
+    //     //     console.log(result)
+    //     //   },
+    //     //   error: (e: RestErrorResponse) => {
+    //     //     this.alert.error('Failed to update data');
+    //     //     console.error(e);
+    //     //     this.loading = false;
+    //     //   }
+    //     // });
+    //     this.http.get('/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=TP312/001', {
+    //         headers: {
+    //             'X-Proxy-Host': 'http://aleph20.exlibris.com.cn:8992'
+    //         }
+    //     }).subscribe(function (data) {
+    //         console.log(data)
+    //     })
+    //     // let request: Request = {
+    //     //   url: 'http://222.128.60.220:8992/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=TP312/001',
+    //     //   method: HttpMethod.GET
+    //     // };
+    //     // this.restService.call(request).subscribe({
+    //     //   next: result => {
+    //     //     console.log(result)
+    //     //     // this.apiResult = result;
+    //     //     // this.refreshPage();
+    //     //   },
+    //     //   error: (e: RestErrorResponse) => {
+    //     //     this.alert.error('Failed to update data');
+    //     //     console.error(e);
+    //     //     this.loading = false;
+    //     //   }
+    //     // });
+    // }
 
-    private sendUpdateRequest(requestBody: any) {
-        let request: Request = {
-            url: this.pageEntities[0].link,
-            method: HttpMethod.PUT,
-            requestBody
-        };
-        this.restService.call(request).subscribe({
-            next: result => {
-                this.apiResult = result;
-                this.refreshPage();
-            },
-            error: (e: RestErrorResponse) => {
-                this.alert.error(this.translate.instant('i18n.errorupdate'),{autoClose:true,delay:3000});
-                console.error(e);
-                this.loading = false;
-            }
-        });
-    }
-
-    private tryParseJson(value: any) {
-        try {
-            return JSON.parse(value);
-        } catch (e) {
-            console.error(e);
-        }
-        return undefined;
-    }
+    // private tryParseJson(value: any) {
+    //     try {
+    //         return JSON.parse(value);
+    //     } catch (e) {
+    //         console.error(e);
+    //     }
+    //     return undefined;
+    // }
 
     setDefaultValue(settings: any) {
         if (settings.institution) {
