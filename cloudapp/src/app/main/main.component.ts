@@ -135,7 +135,7 @@ export class MainComponent implements OnInit, OnDestroy {
             // this.setDefaultValue(settings);
             this.form = FormGroupUtil.toFormGroup(Object.assign(new Settings(), settings))
             // this.form.value = settings as Settings;
-            console.log(this.form)
+            // console.log(this.form)
         });
 
     }
