@@ -28,20 +28,9 @@ export class MainComponent implements OnInit, OnDestroy {
     private name: String = '';
     hasApiResult: boolean = false;
     show: boolean = false;
-    choosebt: boolean = false;
+    choosebt: boolean = false; //the judege button is 'Update' or 'Rebuild'
     rebuildorupdate: boolean = false;
     loading = false;
-    // settings: any = {
-    //     institution: '211030',
-    //     institutionType: 'a',
-    //     holding: '905',
-    //     lookupUrl: '/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY',
-    //     lookupPrefix: '',
-    //     classificationNumber: 'd',
-    //     titleNumber: 'e',
-    //     callNo: 's',
-    //     subfieldsize: '0'
-    // };
 
     constructor(private restService: CloudAppRestService,
                 private eventsService: CloudAppEventsService,
@@ -75,7 +64,6 @@ export class MainComponent implements OnInit, OnDestroy {
             if (entity.type === EntityType.BIB_MMS) {
                 this.restService.call(entity.link).subscribe(result => {
                     this.apiResult = result
-                    // this.updateBib(result)
                     this.getSettings()
                 });
             }
@@ -89,17 +77,12 @@ export class MainComponent implements OnInit, OnDestroy {
         this.show = !this.show;
     }
 
-    setSettings(value: any) {
+    setSettings(value: any) { //the monitor button ,submit form value
         this.loading = true;
         this.choosebt = value;
-        // this.settings = this.form.value
-        // this.settingsService.set(this.form.value).subscribe(response => this.updateBib(this.apiResult));
-        // console.log(this.apiResult)
-        // this.updateBib(this.apiResult)
 
         this.settingsService.set(this.form.value).subscribe(
             response => {
-                // this.alert.success('Settings successfully saved.');
                 this.form.markAsPristine();
                 this.updateBib(this.apiResult)
             },
@@ -110,34 +93,29 @@ export class MainComponent implements OnInit, OnDestroy {
     }
 
     saved() {
-        // this.settings = this.form.value
+        // save form value
 
         if (this.form.value.holding && this.form.value.classificationNumber && this.form.value.titleNumber && this.form.value.callNo) {
             this.show = !this.show;
             this.settingsService.set(this.form.value).subscribe(response =>
                     response => {
-                        // console.log("Saved")
                         this.form.markAsPristine();
                     },
-                err => this.alert.error(err.message,{autoClose:true,delay:3000}),
+                err => this.alert.error(err.message, {autoClose: true, delay: 3000}),
                 // () => this.saving = false
             );
             this.alert.success(this.translate.instant('i18n.savedate'));
         } else {
-            this.alert.error(this.translate.instant('i18n.errortip'),{autoClose:true,delay:3000});
+            this.alert.error(this.translate.instant('i18n.errortip'), {autoClose: true, delay: 3000});
             this.setDefaultValue(this.form.value);
         }
     }
 
     getSettings() {
+        // get default form value
         this.settingsService.get().subscribe(settings => {
-            // this.settings = settings as Settings;
-            // this.setDefaultValue(settings);
             this.form = FormGroupUtil.toFormGroup(Object.assign(new Settings(), settings))
-            // this.form.value = settings as Settings;
-            // console.log(this.form)
         });
-
     }
 
     updateBib(value: any) {
@@ -151,26 +129,22 @@ export class MainComponent implements OnInit, OnDestroy {
         let soutsubfield;
         let datafield995;
         Array.from(doc.getElementsByTagName("datafield")).forEach(datafield => {
-            //遍历查询当前馆藏字段，若有则进行更新数据，若无则重建数据
+            //To traverse and query the fields in the current collection, update the data if there is one, and rebuild the data if there is none
             if (this.form.value.holding == datafield.getAttribute("tag")) {
                 this.rebuildorupdate = true;
-                // console.log(datafield)
                 datafield995 = datafield;
                 Array.from(datafield.getElementsByTagName("subfield")).forEach(subfield => {
                     if (this.form.value.classificationNumber == subfield.getAttribute("code")) {
                         code = subfield.textContent
                         outsubfield = subfield
-                        // console.log(subfield.textContent)
                     }
                     if (this.form.value.titleNumber == subfield.getAttribute("code")) {
                         ecode = subfield.textContent
                         eoutsubfield = subfield
-                        // console.log(subfield.textContent)
                     }
                     if (this.form.value.callNo == subfield.getAttribute("code")) {
                         scode = subfield.textContent
                         soutsubfield = subfield
-                        // console.log(subfield.textContent)
                     }
                 });
             } else {
@@ -178,28 +152,20 @@ export class MainComponent implements OnInit, OnDestroy {
                 if ('690' == datafield.getAttribute("tag")) {
                     datafield995 = datafield.cloneNode();
                     datafield995.setAttribute("tag", this.form.value.holding)
-                    // console.log(datafield995)
                     Array.from(datafield.getElementsByTagName("subfield")).forEach(subfield => {
                         if ('a' == subfield.getAttribute("code")) {
                             code = subfield.textContent
                             outsubfield = subfield
-                            // console.log(subfield.textContent)
                         }
                     });
-                } else {
-                    // console.log('111')
-                    // this.alert.error(this.translate.instant('i18n.rebuilderror'));
                 }
             }
         });
         if (this.choosebt && !this.rebuildorupdate) {
-            // this.loading = false;
-            // this.alert.error(this.translate.instant('i18n.rebuildorupdateerrortip'),{autoClose:true,delay:3000});
             if (!code) {
                 this.loading = false;
-                this.alert.error(this.translate.instant('i18n.rebuilderror'),{autoClose:true,delay:3000});
+                this.alert.error(this.translate.instant('i18n.rebuilderror'), {autoClose: true, delay: 3000});
             }
-            // let seq = "7"
             let seq;
             outsubfield.textContent = code.split("/")[0]
             this.fetch_z311(code).then((res: any) => {
@@ -222,7 +188,6 @@ export class MainComponent implements OnInit, OnDestroy {
 
                 seq = this.repair(res.seq)
 
-                // if(!eoutsubfield) {
                 if (datafield995 && seq) {
                     const template = `<subfield code=${this.form.value.titleNumber}>${seq}</subfield>`;
                     let tempNode = document.createElementNS('', 'div');
@@ -244,15 +209,13 @@ export class MainComponent implements OnInit, OnDestroy {
                 if (this.choosebt) {
                     doc.documentElement.appendChild(datafield995);
                 }
-                // doc.documentElement.removeChild(datafield995);
                 value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
 
-                // console.log(value)
                 if (this.form.value.holding && this.form.value.classificationNumber && this.form.value.titleNumber && this.form.value.callNo) {
                     this.updateAnies(value.anies[0]);
                 } else {
                     this.loading = false;
-                    this.alert.error(this.translate.instant('i18n.errortip'),{autoClose:true,delay:3000});
+                    this.alert.error(this.translate.instant('i18n.errortip'), {autoClose: true, delay: 3000});
                     this.setDefaultValue(this.form.value);
                 }
 
@@ -289,16 +252,14 @@ export class MainComponent implements OnInit, OnDestroy {
                             }
                         }
                         this.sortlist(datafield995)
-                        // console.log(datafield995)
 
                         value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
 
-                        // console.log(value)
                         if (this.form.value.holding && this.form.value.classificationNumber && this.form.value.titleNumber && this.form.value.callNo) {
                             this.updateAnies(value.anies[0]);
                         } else {
                             this.loading = false;
-                            this.alert.error(this.translate.instant('i18n.errortip'),{autoClose:true,delay:3000});
+                            this.alert.error(this.translate.instant('i18n.errortip'), {autoClose: true, delay: 3000});
                             this.setDefaultValue(this.form.value);
                         }
                     })
@@ -326,65 +287,15 @@ export class MainComponent implements OnInit, OnDestroy {
                         this.updateAnies(value.anies[0]);
                     } else {
                         this.loading = false;
-                        this.alert.error(this.translate.instant('i18n.errortip'),{autoClose:true,delay:3000});
+                        this.alert.error(this.translate.instant('i18n.errortip'), {autoClose: true, delay: 3000});
                         this.setDefaultValue(this.form.value);
                     }
                 }
-
-                // this.fetch_z311(code).then((res: any) => {
-                //     seq = res.seq
-                //     if (!eoutsubfield) {
-                //         if (datafield995 && seq) {
-                //             const template = `<subfield code=${this.settings.titleNumber}>${seq}</subfield>`;
-                //             let tempNode = document.createElementNS('', 'div');
-                //             tempNode.innerHTML = template;
-                //             let frag = tempNode.firstChild;
-                //             datafield995.appendChild(frag)
-                //         }
-                //     } else {
-                //         if (seq) {
-                //             eoutsubfield.textContent = seq;
-                //
-                //         }
-                //     }
-                //
-                //     // datafield995.removeChild(eoutsubfield)
-                //     // datafield995.removeChild(soutsubfield)
-                //
-                //     if (!soutsubfield) {
-                //         if (datafield995 && code && seq) {
-                //             const template = `<subfield code=${this.settings.callNo}>${code}/${seq}</subfield>`;
-                //             let tempNode = document.createElementNS("", 'div');
-                //             tempNode.innerHTML = template;
-                //             let frag = tempNode.firstChild;
-                //             datafield995.appendChild(frag)
-                //         }
-                //     } else {
-                //         if (code && seq) {
-                //             soutsubfield.textContent = `${code}/${seq}`
-                //         }
-                //     }
-                //     this.sortlist(datafield995)
-                //     // console.log(datafield995)
-                //
-                //     value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
-                //
-                //     // console.log(value)
-                //     if( this.settings.holding && this.settings.classificationNumber && this.settings.titleNumber && this.settings.callNo){
-                //         this.updateAnies(value.anies[0]);
-                //     }else{
-                //         this.loading = false;
-                //         this.alert.error(this.translate.instant('i18n.errortip'));
-                //         this.setDefaultValue(this.settings);
-                //     }
-                // })
-
             } else {
                 if (!code) {
                     this.loading = false;
-                    this.alert.error(this.translate.instant('i18n.rebuilderror'),{autoClose:true,delay:3000});
+                    this.alert.error(this.translate.instant('i18n.rebuilderror'), {autoClose: true, delay: 3000});
                 }
-                // let seq = "7"
                 let seq;
                 outsubfield.textContent = code.split("/")[0]
                 this.fetch_z311(code).then((res: any) => {
@@ -429,15 +340,13 @@ export class MainComponent implements OnInit, OnDestroy {
                     if (!this.choosebt) {
                         doc.documentElement.appendChild(datafield995);
                     }
-                    // doc.documentElement.removeChild(datafield995);
                     value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
 
-                    // console.log(value)
                     if (this.form.value.holding && this.form.value.classificationNumber && this.form.value.titleNumber && this.form.value.callNo) {
                         this.updateAnies(value.anies[0]);
                     } else {
                         this.loading = false;
-                        this.alert.error(this.translate.instant('i18n.errortip'),{autoClose:true,delay:3000});
+                        this.alert.error(this.translate.instant('i18n.errortip'), {autoClose: true, delay: 3000});
                         this.setDefaultValue(this.form.value);
                     }
 
@@ -446,10 +355,11 @@ export class MainComponent implements OnInit, OnDestroy {
 
         }
     }
-    repair(value:any){
+
+    repair(value: any) { // complement by subfieldsize 0
         let i = 1;
         let zero = '0';
-        if(value.toString().length<this.form.value.subfieldsize){
+        if (value.toString().length < this.form.value.subfieldsize) {
             while (i < this.form.value.subfieldsize - value.toString().length) {
                 zero = zero + '0';
                 i++;
@@ -458,7 +368,8 @@ export class MainComponent implements OnInit, OnDestroy {
         }
         return value;
     }
-    sortlist(value: any) {
+
+    sortlist(value: any) {  // sort
         var new_list_child = value.children;
 
         new_list_child = Array.prototype.slice.call(new_list_child).sort(function (a, b) {
@@ -475,7 +386,6 @@ export class MainComponent implements OnInit, OnDestroy {
         return new Promise((resolve, reject) => {
             this.eventsService.getAuthToken().subscribe(
                 data => {
-                    // console.log(data)
                     this.http.get("https://api.exldevnetwork.net.cn" + this.form.value.lookupUrl.replace("KEY", key), {
                         headers: {
                             'X-Proxy-Host': 'http://aleph20.exlibris.com.cn:8992',
@@ -483,18 +393,16 @@ export class MainComponent implements OnInit, OnDestroy {
                         }
                     }).subscribe(function (data) {
                         this.loading = false;
-                        // console.log(data)
                         resolve(data)
                     }, error => {
                         this.loading = false;
-                        this.alert.error(this.translate.instant('i18n.error', {url: "https://api.exldevnetwork.net.cn" + this.form.value.lookupUrl.replace("KEY", key)}));
+                        this.alert.error(this.translate.instant('i18n.error', {url: "https://api.exldevnetwork.net.cn" + this.form.value.lookupUrl.replace("KEY", key)}), {autoClose: true, delay: 3000});
                         reject(error)
                     })
                 }
             );
 
-            // resolve({seq:"7"})
-            // resolve({seq:Math.ceil(Math.random()*99)})
+            // resolve({seq: Math.ceil(Math.random() * 99)})
         })
 
     }
@@ -516,88 +424,25 @@ export class MainComponent implements OnInit, OnDestroy {
                 // this.alert.success(this.translate.instant('i18n.successupdate'));
             },
             error: (e: RestErrorResponse) => {
-                this.alert.error(this.translate.instant('i18n.errorupdate'),{autoClose:true,delay:3000});
+                this.alert.error(this.translate.instant('i18n.errorupdate'), {autoClose: true, delay: 3000});
                 // console.error(e);
                 this.loading = false;
             }
         });
     }
 
-    // update(value: any) {
-    //     this.loading = true;
-    //     console.log(value)
-    //     let requestBody = this.tryParseJson(value);
-    //     if (!requestBody) {
-    //         this.loading = false;
-    //         return this.alert.error(this.translate.instant('i18n.errorjson'),{autoClose:true,delay:3000});
-    //     }
-    //     this.sendUpdateRequest(requestBody);
-    // }
-
     refreshPage = () => {
         this.loading = true;
         this.eventsService.refreshPage().subscribe({
             next: () => this.alert.success('Success!'),
             error: e => {
-                // console.error(e);
-                this.alert.error(this.translate.instant('i18n.errorrefreshpage'),{autoClose:true,delay:3000});
+                this.alert.error(this.translate.instant('i18n.errorrefreshpage'), {autoClose: true, delay: 3000});
             },
             complete: () => this.loading = false
         });
     }
 
-    // private getData() {
-    //     // let request: Request = {
-    //     //   url: '/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=TP312/001',
-    //     //   method: HttpMethod.GET,
-    //     //   headers:{
-    //     //     'X-Proxy-Host':'http://aleph20.exlibris.com.cn:8992'
-    //     //   }
-    //     // };
-    //     // this.restService.call(request).subscribe({
-    //     //   next: result => {
-    //     //     console.log(result)
-    //     //   },
-    //     //   error: (e: RestErrorResponse) => {
-    //     //     this.alert.error('Failed to update data');
-    //     //     console.error(e);
-    //     //     this.loading = false;
-    //     //   }
-    //     // });
-    //     this.http.get('/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=TP312/001', {
-    //         headers: {
-    //             'X-Proxy-Host': 'http://aleph20.exlibris.com.cn:8992'
-    //         }
-    //     }).subscribe(function (data) {
-    //         console.log(data)
-    //     })
-    //     // let request: Request = {
-    //     //   url: 'http://222.128.60.220:8992/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=TP312/001',
-    //     //   method: HttpMethod.GET
-    //     // };
-    //     // this.restService.call(request).subscribe({
-    //     //   next: result => {
-    //     //     console.log(result)
-    //     //     // this.apiResult = result;
-    //     //     // this.refreshPage();
-    //     //   },
-    //     //   error: (e: RestErrorResponse) => {
-    //     //     this.alert.error('Failed to update data');
-    //     //     console.error(e);
-    //     //     this.loading = false;
-    //     //   }
-    //     // });
-    // }
-
-    // private tryParseJson(value: any) {
-    //     try {
-    //         return JSON.parse(value);
-    //     } catch (e) {
-    //         console.error(e);
-    //     }
-    //     return undefined;
-    // }
-
+    // if form value is null,fill the default value
     setDefaultValue(settings: any) {
         if (settings.institution) {
             this.form.value.institution = settings.institution

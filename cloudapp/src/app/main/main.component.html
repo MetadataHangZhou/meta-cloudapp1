@@ -1,7 +1,7 @@
 <section>
     <section *ngIf="!show">
         <div style="text-align: right">
-            <button mat-raised-button color="primary" (click)="showConfig()"><img src="../assets/config.png"></button>
+            <button mat-raised-button color="primary" (click)="showConfig()" [disabled]="!hasApiResult || loading"><img src="../assets/config.png"></button>
         </div>
     </section>
     <h1>
@@ -47,7 +47,6 @@
                         <mat-option [value]="4">4 {{'i18n.digits'|translate}}</mat-option>
                         <mat-option [value]="5">5 {{'i18n.digits'|translate}}</mat-option>
                         <mat-option [value]="6">6 {{'i18n.digits'|translate}}</mat-option>
-                        <!--<mat-option value="option3">Option 3</mat-option>-->
                     </mat-select>
                 </mat-form-field>
                 <mat-form-field class="example-full-width">
@@ -99,22 +98,6 @@
     >{{'i18n.Update'|translate}}</button>
     <button mat-raised-button color="primary" (click)="setSettings(false)" [disabled]="!hasApiResult || loading"
     >{{'i18n.Rebuild'|translate}}</button>
-    <!--<mat-card class="example-card" >-->
-    <!--<mat-card-header>-->
-    <!--<mat-card-title>API Result</mat-card-title>-->
-    <!--</mat-card-header>-->
-    <!--<mat-card-content>-->
-    <!--<textarea #apiResultArea [value]="apiResult | json"></textarea>-->
-    <!--</mat-card-content>-->
-    <!--<mat-card-actions>-->
-    <!--<button mat-raised-button color="primary" (click)="update(apiResultArea.value)"-->
-    <!--[disabled]="!hasApiResult || loading">重新生成-->
-    <!--</button>-->
-    <!--<button mat-raised-button color="primary" (click)="update(apiResultArea.value)"-->
-    <!--[disabled]="!hasApiResult || loading">更新-->
-    <!--</button>-->
-    <!--</mat-card-actions>-->
-    <!--</mat-card>-->
 </section>
 <div class="loading-shade" *ngIf="loading">
     <mat-spinner diameter="50"></mat-spinner>
