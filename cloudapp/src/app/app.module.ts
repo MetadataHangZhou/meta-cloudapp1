@@ -8,12 +8,14 @@ import { MaterialModule, getTranslateModule, AlertModule } from '@exlibris/exl-c
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { MainComponent } from './main/main.component';
+import { SettingsComponent } from './settings/settings.component';
 import {FormsModule,ReactiveFormsModule} from "@angular/forms";
 
 @NgModule({
   declarations: [
     AppComponent,
     MainComponent,
+    SettingsComponent
   ],
     imports: [
         MaterialModule,
