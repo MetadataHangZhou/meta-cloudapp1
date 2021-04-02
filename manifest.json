@@ -47,5 +47,8 @@
          "popups": true,
          "modals": true
       }
+   },
+   "pages": {
+      "settings": "/#/main"
    }
 }
