@@ -41,7 +41,8 @@
    },
    "contentSecurity": {
       "connectSrc": [
-         "https://api.exldevnetwork.net.cn"
+         "https://api.exldevnetwork.net.cn",
+         "https://*.execute-api.cn-north-1.amazonaws.com.cn/"
       ],
       "sandbox": {
          "popups": true,
