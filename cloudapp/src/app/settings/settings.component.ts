@@ -386,7 +386,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
         return new Promise((resolve, reject) => {
             this.eventsService.getAuthToken().subscribe(
                 data => {
-                    this.http.get("https://api.exldevnetwork.net.cn" + this.form.value.lookupUrl.replace("KEY", key), {
+                    this.http.get("https://dxcgj4rqx9.execute-api.cn-north-1.amazonaws.com.cn" + this.form.value.lookupUrl.replace("KEY", key), {
                         headers: {
                             'X-Proxy-Host': 'http://aleph20.exlibris.com.cn:8992',
                             'Authorization': 'Bearer ' + data
@@ -396,7 +396,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
                         resolve(data)
                     }, error => {
                         this.loading = false;
-                        this.alert.error(this.translate.instant('i18n.error', {url: "https://api.exldevnetwork.net.cn" + this.form.value.lookupUrl.replace("KEY", key)}), {autoClose: true, delay: 3000});
+                        this.alert.error(this.translate.instant('i18n.error', {url: "https://dxcgj4rqx9.execute-api.cn-north-1.amazonaws.com.cn" + this.form.value.lookupUrl.replace("KEY", key)}), {autoClose: true, delay: 3000});
                         reject(error)
                     })
                 }
