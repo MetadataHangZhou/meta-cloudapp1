@@ -462,7 +462,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
         if (settings.lookupUrl) {
             this.form.value.lookupUrl = settings.lookupUrl
         } else {
-            this.form.value.lookupUrl = '/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY'
+            this.form.value.lookupUrl = '/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY'
         }
         if (settings.lookupPrefix) {
             this.form.value.lookupPrefix = settings.lookupPrefix
