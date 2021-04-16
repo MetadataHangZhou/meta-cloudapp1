@@ -386,7 +386,7 @@ export class MainComponent implements OnInit, OnDestroy {
         return new Promise((resolve, reject) => {
             this.eventsService.getAuthToken().subscribe(
                 data => {
-                    this.http.get("https://dxcgj4rqx9.execute-api.cn-north-1.amazonaws.com.cn" + this.form.value.lookupUrl.replace("KEY", key), {
+                    this.http.get("https://api.exldevnetwork.net.cn" + this.form.value.lookupUrl.replace("KEY", key), {
                         headers: {
                             'X-Proxy-Host': 'http://aleph20.exlibris.com.cn:8992',
                             'Authorization': 'Bearer ' + data
@@ -463,7 +463,7 @@ export class MainComponent implements OnInit, OnDestroy {
             this.form.value.lookupUrl = settings.lookupUrl
         } else {
             // /proxy
-            this.form.value.lookupUrl = '/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY'
+            this.form.value.lookupUrl = '/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY'
         }
         if (settings.lookupPrefix) {
             this.form.value.lookupPrefix = settings.lookupPrefix
