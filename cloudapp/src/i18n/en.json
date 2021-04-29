@@ -3,6 +3,7 @@
     "Settings": "Settings",
     "UserCode": "Institution code",
     "UserCodefile" : "Institution code field",
+    "Classification": "Classification",
     "Collectionfield": "Holding field",
     "CallNumberEnquiry": "Call-no lookup URL",
     "CallNumberQueryType": "Call-no loopup prefix",
@@ -10,7 +11,7 @@
     "SubfieldOfSpeciesNumber": "Title number subfield",
     "CallNumberSubfield": "Call-no subfield",
     "Rebuild": "Rebuild",
-    "Update": "Update",
+    "Update": "Create",
     "rebuildorupdateerrortip":"This Holding field is not available, please rebuild it !",
     "errorupdate": "Failed to update data",
     "successupdate": "Success to update data",
@@ -29,6 +30,9 @@
     "errortip": "Holding field、Classification number subfield、Title number subfield and Call-no subfield cannot be null！",
     "subfieldsize": "Title number length",
     "zero": "No-leading zero",
-    "digits": "digits"
+    "digits": "digits",
+    "errorconfigtip": "Please configure the parameters first",
+    "call-nosub": "Classification field/sub-field",
+    "Publishedyear": "Pub. Year included in the call-no.  "
   }
 }

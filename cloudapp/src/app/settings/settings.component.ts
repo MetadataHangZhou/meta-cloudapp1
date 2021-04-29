@@ -1,5 +1,5 @@
 import {Subscription} from 'rxjs';
-import {FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {FormBuilder,FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {Component, OnInit, OnDestroy, NgModule} from '@angular/core';
 import {HttpClientModule, HttpClient} from '@angular/common/http'
 import {TranslateService} from '@ngx-translate/core';
@@ -7,7 +7,8 @@ import {
     CloudAppRestService, CloudAppEventsService, Request, HttpMethod,
     Entity, PageInfo, RestErrorResponse, AlertService, CloudAppSettingsService, EntityType, FormGroupUtil
 } from '@exlibris/exl-cloudapp-angular-lib';
-import {Settings} from '../models/settings';
+import {Cnmarc} from '../models/cnmarc';
+import {Marc21} from "../models/marc21";
 
 @Component({
     selector: 'app-settings',
@@ -20,28 +21,60 @@ import {Settings} from '../models/settings';
 export class SettingsComponent implements OnInit, OnDestroy {
 
     form: FormGroup;
-    // saving = false;
+    form21:FormGroup;
 
     private pageLoad$: Subscription;
     pageEntities: Entity[];
     private _apiResult: any;
     private name: String = '';
     hasApiResult: boolean = false;
+    ifCNor21:boolean = false;
     show: boolean = false;
-    choosebt: boolean = false; //the judege button is 'Update' or 'Rebuild'
-    rebuildorupdate: boolean = false;
     loading = false;
+    Publishedyear:boolean = false;
+    year:String = '';
+    models:any = {
+        cnmarc:{
+            institution:'',
+            institutionType:'a',
+            classification:'690a',
+            holding: '905',
+            lookupUrl: '/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY',
+            lookupPrefix:'',
+            classificationNumber: 'd',
+            titleNumber: 'e',
+            callNo: 's',
+            subfieldsize: '0',
+            Publishedyear:false,
+            year:'',
+            pubyear:false
+        },
+        marc21:{
+            institution:'',
+            institutionType:'a',
+            classification:'093a',
+            holding: '905',
+            lookupUrl: '/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY',
+            lookupPrefix:'',
+            classificationNumber: 'd',
+            titleNumber: 'u',
+            callNo: 's',
+            subfieldsize: '0',
+        }
+    }
 
     constructor(private restService: CloudAppRestService,
                 private eventsService: CloudAppEventsService,
                 private settingsService: CloudAppSettingsService,
                 private translate: TranslateService,
                 private http: HttpClient,
+                private fb:FormBuilder,
                 private alert: AlertService) {
     }
 
     ngOnInit() {
         this.pageLoad$ = this.eventsService.onPageLoad(this.onPageLoad);
+        this.getSettings()
     }
 
     ngOnDestroy(): void {
@@ -64,7 +97,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
             if (entity.type === EntityType.BIB_MMS) {
                 this.restService.call(entity.link).subscribe(result => {
                     this.apiResult = result
-                    this.getSettings()
+                    this.parseRes(this.apiResult)
                 });
             }
 
@@ -76,284 +109,79 @@ export class SettingsComponent implements OnInit, OnDestroy {
     showConfig() {
         history.back()
     }
-
-    setSettings(value: any) { //the monitor button ,submit form value
-        this.loading = true;
-        this.choosebt = value;
-
-        this.settingsService.set(this.form.value).subscribe(
-            response => {
-                this.form.markAsPristine();
-                this.updateBib(this.apiResult)
-            },
-            // err => this.alert.error(err.message),
-            // ()  => this.saving = false
-        );
-
+    chooseCN21(){
+        this.ifCNor21 = !this.ifCNor21;
     }
 
     saved() {
-        // save form value
-
-        if (this.form.value.holding && this.form.value.classificationNumber && this.form.value.titleNumber && this.form.value.callNo) {
-            this.show = !this.show;
-            this.settingsService.set(this.form.value).subscribe(response =>
-                    response => {
-                        this.form.markAsPristine();
-                    },
-                err => this.alert.error(err.message, {autoClose: true, delay: 3000}),
-                // () => this.saving = false
-            );
-            this.alert.success(this.translate.instant('i18n.savedate'));
-        } else {
-            this.alert.error(this.translate.instant('i18n.errortip'), {autoClose: true, delay: 3000});
-            this.setDefaultValue(this.form.value);
+        if(!this.ifCNor21){
+            if (this.form.value.holding && this.form.value.classificationNumber && this.form.value.titleNumber && this.form.value.callNo) {
+                this.setconfig();
+                this.alert.success(this.translate.instant('i18n.savedate'));
+            } else {
+                this.alert.error(this.translate.instant('i18n.errortip'), {autoClose: true, delay: 3000});
+                this.setDefaultValue(this.form.value);
+            }
+        }else{
+            if (this.form21.value.holding && this.form21.value.classificationNumber && this.form21.value.titleNumber && this.form21.value.callNo) {
+                this.setconfig();
+                this.alert.success(this.translate.instant('i18n.savedate'));
+            } else {
+                this.alert.error(this.translate.instant('i18n.errortip'), {autoClose: true, delay: 3000});
+                this.setDefaultValue(this.form21.value);
+            }
         }
     }
 
     getSettings() {
-        // get default form value
         this.settingsService.get().subscribe(settings => {
-            this.form = FormGroupUtil.toFormGroup(Object.assign(new Settings(), settings))
+            if(settings){
+                if(settings.cnmarc){
+                    this.form = FormGroupUtil.toFormGroup(Object.assign(new Cnmarc(), settings.cnmarc))
+                }else{
+                    this.form = FormGroupUtil.toFormGroup(Object.assign(new Cnmarc(), this.models.cnmarc))
+                }
+                if(settings.marc21){
+                    this.form21 = FormGroupUtil.toFormGroup(Object.assign(new Marc21(), settings.marc21))
+                }else{
+                    this.form21 = FormGroupUtil.toFormGroup(Object.assign(new Marc21(), this.models.marc21))
+                }
+            }else{
+                this.form = FormGroupUtil.toFormGroup(Object.assign(new Cnmarc(), this.models.cnmarc))
+                this.form21 = FormGroupUtil.toFormGroup(Object.assign(new Marc21(), this.models.marc21))
+            }
+
         });
     }
 
-    updateBib(value: any) {
+
+    parseRes(value:any){
+        //parse api for page
         let anies = value.anies[0]
         const doc = new DOMParser().parseFromString(anies, "application/xml");
-        let code = "";
-        let ecode = "";
-        let scode = "";
-        let outsubfield;
-        let eoutsubfield;
-        let soutsubfield;
-        let datafield995;
-        Array.from(doc.getElementsByTagName("datafield")).forEach(datafield => {
-            //To traverse and query the fields in the current collection, update the data if there is one, and rebuild the data if there is none
-            if (this.form.value.holding == datafield.getAttribute("tag")) {
-                this.rebuildorupdate = true;
-                datafield995 = datafield;
+        let field100='';
+        // console.log(doc)
+        //extract the data in field "ldr"
+        let fieldldr = doc.getElementsByTagName("leader")[0].innerHTML
+        // console.log(fieldldr.substring(7,8))
+
+        //extract the data in field "100"
+        Array.from(doc.getElementsByTagName("datafield")).forEach(datafield =>{
+            if(datafield.getAttribute("tag") == '100'){
                 Array.from(datafield.getElementsByTagName("subfield")).forEach(subfield => {
-                    if (this.form.value.classificationNumber == subfield.getAttribute("code")) {
-                        code = subfield.textContent
-                        outsubfield = subfield
-                    }
-                    if (this.form.value.titleNumber == subfield.getAttribute("code")) {
-                        ecode = subfield.textContent
-                        eoutsubfield = subfield
-                    }
-                    if (this.form.value.callNo == subfield.getAttribute("code")) {
-                        scode = subfield.textContent
-                        soutsubfield = subfield
+                    if ('a' == subfield.getAttribute("code")) {
+                        field100 = subfield.textContent
                     }
                 });
-            } else {
-                this.rebuildorupdate = false;
-                if ('690' == datafield.getAttribute("tag")) {
-                    datafield995 = datafield.cloneNode();
-                    datafield995.setAttribute("tag", this.form.value.holding)
-                    Array.from(datafield.getElementsByTagName("subfield")).forEach(subfield => {
-                        if ('a' == subfield.getAttribute("code")) {
-                            code = subfield.textContent
-                            outsubfield = subfield
-                        }
-                    });
-                }
+
             }
-        });
-        if (this.choosebt && !this.rebuildorupdate) {
-            if (!code) {
-                this.loading = false;
-                this.alert.error(this.translate.instant('i18n.rebuilderror'), {autoClose: true, delay: 3000});
-            }
-            let seq;
-            outsubfield.textContent = code.split("/")[0]
-            this.fetch_z311(code).then((res: any) => {
-                datafield995.innerHTML = '';
-                if (this.form.value.institution != '' && this.form.value.institutionType != '') {
-                    const template = `<subfield code=${this.form.value.institutionType}>${this.form.value.institution}</subfield>`;
-                    let tempNode = document.createElementNS("", 'div');
-                    tempNode.innerHTML = template;
-                    let frag = tempNode.firstChild;
-                    datafield995.appendChild(frag)
-                }
+        })
 
-                if (code) {
-                    const template = `<subfield code=${this.form.value.classificationNumber}>${code}</subfield>`;
-                    let tempNode = document.createElementNS('', 'div');
-                    tempNode.innerHTML = template;
-                    let frag = tempNode.firstChild;
-                    datafield995.appendChild(frag)
-                }
-
-                seq = this.repair(res.seq)
-
-                if (datafield995 && seq) {
-                    const template = `<subfield code=${this.form.value.titleNumber}>${seq}</subfield>`;
-                    let tempNode = document.createElementNS('', 'div');
-                    tempNode.innerHTML = template;
-                    let frag = tempNode.firstChild;
-                    datafield995.appendChild(frag)
-                }
-
-                if (datafield995 && code && seq) {
-                    const template = `<subfield code=${this.form.value.callNo}>${code}/${seq}</subfield>`;
-                    let tempNode = document.createElementNS("", 'div');
-                    tempNode.innerHTML = template;
-                    let frag = tempNode.firstChild;
-                    datafield995.appendChild(frag)
-                }
-
-                this.sortlist(datafield995)
-
-                if (this.choosebt) {
-                    doc.documentElement.appendChild(datafield995);
-                }
-                value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
-
-                if (this.form.value.holding && this.form.value.classificationNumber && this.form.value.titleNumber && this.form.value.callNo) {
-                    this.updateAnies(value.anies[0]);
-                } else {
-                    this.loading = false;
-                    this.alert.error(this.translate.instant('i18n.errortip'), {autoClose: true, delay: 3000});
-                    this.setDefaultValue(this.form.value);
-                }
-
-            })
-        } else {
-            if (this.choosebt) {
-                let seq;
-                outsubfield.textContent = code.split("/")[0]
-                if (!eoutsubfield || !ecode) {
-                    this.fetch_z311(code).then((res: any) => {
-                        seq = this.repair(res.seq)
-                        if (datafield995 && seq) {
-                            const template = `<subfield code=${this.form.value.titleNumber}>${seq}</subfield>`;
-                            let tempNode = document.createElementNS('', 'div');
-                            tempNode.innerHTML = template;
-                            let frag = tempNode.firstChild;
-                            datafield995.appendChild(frag)
-                        }
-
-                        // datafield995.removeChild(eoutsubfield)
-                        // datafield995.removeChild(soutsubfield)
-
-                        if (!soutsubfield) {
-                            if (datafield995 && code && seq) {
-                                const template = `<subfield code=${this.form.value.callNo}>${code}/${seq}</subfield>`;
-                                let tempNode = document.createElementNS("", 'div');
-                                tempNode.innerHTML = template;
-                                let frag = tempNode.firstChild;
-                                datafield995.appendChild(frag)
-                            }
-                        } else {
-                            if (code && seq) {
-                                soutsubfield.textContent = `${code}/${seq}`
-                            }
-                        }
-                        this.sortlist(datafield995)
-
-                        value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
-
-                        if (this.form.value.holding && this.form.value.classificationNumber && this.form.value.titleNumber && this.form.value.callNo) {
-                            this.updateAnies(value.anies[0]);
-                        } else {
-                            this.loading = false;
-                            this.alert.error(this.translate.instant('i18n.errortip'), {autoClose: true, delay: 3000});
-                            this.setDefaultValue(this.form.value);
-                        }
-                    })
-                } else {
-                    eoutsubfield.textContent = `${ecode}`;
-
-                    if (!soutsubfield) {
-                        if (datafield995 && code && ecode) {
-                            const template = `<subfield code=${this.form.value.callNo}>${code}/${ecode}</subfield>`;
-                            let tempNode = document.createElementNS("", 'div');
-                            tempNode.innerHTML = template;
-                            let frag = tempNode.firstChild;
-                            datafield995.appendChild(frag)
-                        }
-                    } else {
-                        if (code && ecode) {
-                            soutsubfield.textContent = `${code}/${ecode}`
-                        }
-                    }
-                    this.sortlist(datafield995)
-
-                    value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
-
-                    if (this.form.value.holding && this.form.value.classificationNumber && this.form.value.titleNumber && this.form.value.callNo) {
-                        this.updateAnies(value.anies[0]);
-                    } else {
-                        this.loading = false;
-                        this.alert.error(this.translate.instant('i18n.errortip'), {autoClose: true, delay: 3000});
-                        this.setDefaultValue(this.form.value);
-                    }
-                }
-            } else {
-                if (!code) {
-                    this.loading = false;
-                    this.alert.error(this.translate.instant('i18n.rebuilderror'), {autoClose: true, delay: 3000});
-                }
-                let seq;
-                outsubfield.textContent = code.split("/")[0]
-                this.fetch_z311(code).then((res: any) => {
-                    datafield995.innerHTML = '';
-                    if (this.form.value.institution != '' && this.form.value.institutionType != '') {
-                        const template = `<subfield code=${this.form.value.institutionType}>${this.form.value.institution}</subfield>`;
-                        let tempNode = document.createElementNS("", 'div');
-                        tempNode.innerHTML = template;
-                        let frag = tempNode.firstChild;
-                        datafield995.appendChild(frag)
-                    }
-
-                    if (code) {
-                        const template = `<subfield code=${this.form.value.classificationNumber}>${code}</subfield>`;
-                        let tempNode = document.createElementNS('', 'div');
-                        tempNode.innerHTML = template;
-                        let frag = tempNode.firstChild;
-                        datafield995.appendChild(frag)
-                    }
-
-                    seq = this.repair(res.seq)
-
-                    // if(!eoutsubfield) {
-                    if (datafield995 && seq) {
-                        const template = `<subfield code=${this.form.value.titleNumber}>${seq}</subfield>`;
-                        let tempNode = document.createElementNS('', 'div');
-                        tempNode.innerHTML = template;
-                        let frag = tempNode.firstChild;
-                        datafield995.appendChild(frag)
-                    }
-
-                    if (datafield995 && code && seq) {
-                        const template = `<subfield code=${this.form.value.callNo}>${code}/${seq}</subfield>`;
-                        let tempNode = document.createElementNS("", 'div');
-                        tempNode.innerHTML = template;
-                        let frag = tempNode.firstChild;
-                        datafield995.appendChild(frag)
-                    }
-
-                    this.sortlist(datafield995)
-
-                    if (!this.choosebt) {
-                        doc.documentElement.appendChild(datafield995);
-                    }
-                    value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
-
-                    if (this.form.value.holding && this.form.value.classificationNumber && this.form.value.titleNumber && this.form.value.callNo) {
-                        this.updateAnies(value.anies[0]);
-                    } else {
-                        this.loading = false;
-                        this.alert.error(this.translate.instant('i18n.errortip'), {autoClose: true, delay: 3000});
-                        this.setDefaultValue(this.form.value);
-                    }
-
-                })
-            }
-
+        if(fieldldr.substring(7,8) == 'm' && field100.substring(22,25) == 'chi'){
+            //When conditions are unique, the year of publication must be carried
+            this.Publishedyear = true;
         }
+            this.year = field100.substring(9,13);
     }
 
     repair(value: any) { // complement by subfieldsize 0
@@ -396,7 +224,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
                         resolve(data)
                     }, error => {
                         this.loading = false;
-                        this.alert.error(this.translate.instant('i18n.error', {url: "https://dxcgj4rqx9.execute-api.cn-north-1.amazonaws.com.cn" + this.form.value.lookupUrl.replace("KEY", key)}), {autoClose: true, delay: 3000});
+                        this.alert.error(this.translate.instant('i18n.error', {url: "https://api.exldevnetwork.net.cn" + this.form.value.lookupUrl.replace("KEY", key)}), {autoClose: true, delay: 3000});
                         reject(error)
                     })
                 }
@@ -407,88 +235,155 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
     }
 
-    updateAnies(anies: string) {
-        let request: Request = {
-            url: this.pageEntities[0].link,
-            method: HttpMethod.PUT,
-            headers: {
-                "Content-Type": "application/xml",
-                Accept: "application/json"
-            },
-            requestBody: `<bib>${anies}</bib>`,
-        };
-        this.restService.call(request).subscribe({
-            next: result => {
-                this.loading = false;
-                this.refreshPage();
-                // this.alert.success(this.translate.instant('i18n.successupdate'));
-            },
-            error: (e: RestErrorResponse) => {
-                this.alert.error(this.translate.instant('i18n.errorupdate'), {autoClose: true, delay: 3000});
-                // console.error(e);
-                this.loading = false;
-            }
-        });
-    }
-
-    refreshPage = () => {
-        this.loading = true;
-        this.eventsService.refreshPage().subscribe({
-            next: () => this.alert.success('Success!'),
-            error: e => {
-                this.alert.error(this.translate.instant('i18n.errorrefreshpage'), {autoClose: true, delay: 3000});
-            },
-            complete: () => this.loading = false
-        });
-    }
-
     // if form value is null,fill the default value
     setDefaultValue(settings: any) {
-        if (settings.institution) {
-            this.form.value.institution = settings.institution
-        } else {
-            this.form.value.institution = '211030'
+        if(!this.ifCNor21){
+            if (settings.institution) {
+                this.form.value.institution = settings.institution
+            } else {
+                this.form.value.institution = '211030'
+            }
+            if (settings.institutionType) {
+                this.form.value.institutionType = settings.institutionType
+            } else {
+                this.form.value.institutionType = 'a'
+            }
+            if (settings.institutionType) {
+                this.form.value.institutionType = settings.institutionType
+            } else {
+                this.form.value.institutionType = 'a'
+            }
+            if (settings.classification) {
+                this.form.value.classification = settings.classification
+            } else {
+                this.form.value.classification = '690a'
+            }
+            if (settings.holding) {
+                this.form.value.holding = settings.holding
+            } else {
+                this.form.value.holding = '905'
+            }
+            if (settings.lookupUrl) {
+                this.form.value.lookupUrl = settings.lookupUrl
+            } else {
+                this.form.value.lookupUrl = '/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY'
+            }
+            if (settings.lookupPrefix) {
+                this.form.value.lookupPrefix = settings.lookupPrefix
+            } else {
+                this.form.value.lookupPrefix = ''
+            }
+            if (settings.classificationNumber) {
+                this.form.value.classificationNumber = settings.classificationNumber
+            } else {
+                this.form.value.classificationNumber = 'd'
+            }
+            if (settings.titleNumber) {
+                this.form.value.titleNumber = settings.titleNumber
+            } else {
+                this.form.value.titleNumber = 'e'
+            }
+            if (settings.callNo) {
+                this.form.value.callNo = settings.callNo
+            } else {
+                this.form.value.callNo = 's'
+            }
+            if (settings.subfieldsize) {
+                this.form.value.subfieldsize = settings.subfieldsize
+            } else {
+                this.form.value.subfieldsize = '0'
+            }
+            if (settings.Publishedyear) {
+                this.form.value.Publishedyear = settings.Publishedyear
+            } else {
+                this.form.value.Publishedyear = false
+            }
+            if (settings.year) {
+                this.form.value.year = settings.year
+            } else {
+                this.form.value.year = ''
+            }
+            if (settings.pubyear) {
+                this.form.value.pubyear = settings.pubyear
+            } else {
+                this.form.value.pubyear = false
+            }
+        }else{
+            if (settings.institution) {
+                this.form21.value.institution = settings.institution
+            } else {
+                this.form21.value.institution = '211010'
+            }
+            if (settings.institutionType) {
+                this.form21.value.institutionType = settings.institutionType
+            } else {
+                this.form21.value.institutionType = 'a'
+            }
+            if (settings.classification) {
+                this.form21.value.classification = settings.classification
+            } else {
+                this.form21.value.classification = '093a'
+            }
+            if (settings.holding) {
+                this.form21.value.holding = settings.holding
+            } else {
+                this.form21.value.holding = '905'
+            }
+            if (settings.lookupUrl) {
+                this.form21.value.lookupUrl = settings.lookupUrl
+            } else {
+                this.form21.value.lookupUrl = '/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY'
+            }
+            if (settings.lookupPrefix) {
+                this.form21.value.lookupPrefix = settings.lookupPrefix
+            } else {
+                this.form21.value.lookupPrefix = ''
+            }
+            if (settings.classificationNumber) {
+                this.form21.value.classificationNumber = settings.classificationNumber
+            } else {
+                this.form21.value.classificationNumber = 'a'
+            }
+            if (settings.titleNumber) {
+                this.form21.value.titleNumber = settings.titleNumber
+            } else {
+                this.form21.value.titleNumber = 'b'
+            }
+            if (settings.callNo) {
+                this.form21.value.callNo = settings.callNo
+            } else {
+                this.form21.value.callNo = 'u'
+            }
+            if (settings.subfieldsize) {
+                this.form21.value.subfieldsize = settings.subfieldsize
+            } else {
+                this.form21.value.subfieldsize = '0'
+            }
+
+
         }
-        if (settings.institutionType) {
-            this.form.value.institutionType = settings.institutionType
-        } else {
-            this.form.value.institutionType = 'a'
-        }
-        if (settings.holding) {
-            this.form.value.holding = settings.holding
-        } else {
-            this.form.value.holding = '905'
-        }
-        if (settings.lookupUrl) {
-            this.form.value.lookupUrl = settings.lookupUrl
-        } else {
-            this.form.value.lookupUrl = '/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY'
-        }
-        if (settings.lookupPrefix) {
-            this.form.value.lookupPrefix = settings.lookupPrefix
-        } else {
-            this.form.value.lookupPrefix = ''
-        }
-        if (settings.classificationNumber) {
-            this.form.value.classificationNumber = settings.classificationNumber
-        } else {
-            this.form.value.classificationNumber = 'd'
-        }
-        if (settings.titleNumber) {
-            this.form.value.titleNumber = settings.titleNumber
-        } else {
-            this.form.value.titleNumber = 'e'
-        }
-        if (settings.callNo) {
-            this.form.value.callNo = settings.callNo
-        } else {
-            this.form.value.callNo = 's'
-        }
-        if (settings.subfieldsize) {
-            this.form.value.subfieldsize = settings.subfieldsize
-        } else {
-            this.form.value.subfieldsize = '0'
-        }
+
     }
 
+    setconfig(){
+        this.show = !this.show;
+        if(this.Publishedyear && this.form.value.Publishedyear){
+            this.form.value.pubyear = true;
+            this.form.value.year = this.year
+        }else{
+            this.form.value.pubyear = false;
+            this.form.value.year = ''
+        }
+        this.models.cnmarc = this.form.value
+        this.models.marc21 = this.form21.value
+        this.settingsService.set(this.models).subscribe(response =>
+                response => {
+                    this.form.markAsPristine();
+                },
+            err => this.alert.error(err.message, {autoClose: true, delay: 3000}),
+            // () => this.saving = false
+        );
+    }
 }
+
+

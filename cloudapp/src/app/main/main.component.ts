@@ -7,7 +7,8 @@ import {
     CloudAppRestService, CloudAppEventsService, Request, HttpMethod,
     Entity, PageInfo, RestErrorResponse, AlertService, CloudAppSettingsService, EntityType, FormGroupUtil
 } from '@exlibris/exl-cloudapp-angular-lib';
-import {Settings} from '../models/settings';
+import {Cnmarc} from '../models/cnmarc';
+import {Marc21} from "../models/marc21";
 
 @Component({
     selector: 'app-main',
@@ -20,7 +21,7 @@ import {Settings} from '../models/settings';
 export class MainComponent implements OnInit, OnDestroy {
 
     form: FormGroup;
-    // saving = false;
+    form21:FormGroup;
 
     private pageLoad$: Subscription;
     pageEntities: Entity[];
@@ -31,6 +32,32 @@ export class MainComponent implements OnInit, OnDestroy {
     choosebt: boolean = false; //the judege button is 'Update' or 'Rebuild'
     rebuildorupdate: boolean = false;
     loading = false;
+    models:any = {
+        cnmarc:{
+            institution:'',
+            institutionType:'a',
+            classification:'690',
+            holding: '905',
+            lookupUrl: '/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY',
+            lookupPrefix:'',
+            classificationNumber: 'd',
+            titleNumber: 'e',
+            callNo: 's',
+            subfieldsize: '0'
+        },
+        marc21:{
+            institution:'',
+            institutionType:'a',
+            classification:'690',
+            holding: '090',
+            lookupUrl: '/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY',
+            lookupPrefix:'',
+            classificationNumber: 'd',
+            titleNumber: 'u',
+            callNo: 's',
+            subfieldsize: '0'
+        }
+    }
 
     constructor(private restService: CloudAppRestService,
                 private eventsService: CloudAppEventsService,
@@ -42,6 +69,7 @@ export class MainComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.pageLoad$ = this.eventsService.onPageLoad(this.onPageLoad);
+        this.getSettings()
     }
 
     ngOnDestroy(): void {
@@ -64,7 +92,7 @@ export class MainComponent implements OnInit, OnDestroy {
             if (entity.type === EntityType.BIB_MMS) {
                 this.restService.call(entity.link).subscribe(result => {
                     this.apiResult = result
-                    this.getSettings()
+
                 });
             }
 
@@ -73,48 +101,47 @@ export class MainComponent implements OnInit, OnDestroy {
         }
     }
 
-    showConfig() {
-        this.show = !this.show;
-    }
-
-    setSettings(value: any) { //the monitor button ,submit form value
+    setSettings(value: any) {
+        //the monitor button ,submit form value
         this.loading = true;
         this.choosebt = value;
 
-        this.settingsService.set(this.form.value).subscribe(
-            response => {
-                this.form.markAsPristine();
-                this.updateBib(this.apiResult)
-            },
-            // err => this.alert.error(err.message),
-            // ()  => this.saving = false
-        );
-
-    }
-
-    saved() {
-        // save form value
-
-        if (this.form.value.holding && this.form.value.classificationNumber && this.form.value.titleNumber && this.form.value.callNo) {
-            this.show = !this.show;
-            this.settingsService.set(this.form.value).subscribe(response =>
-                    response => {
-                        this.form.markAsPristine();
-                    },
-                err => this.alert.error(err.message, {autoClose: true, delay: 3000}),
-                // () => this.saving = false
+        if(!this.models || !this.models.cnmarc || !this.models.marc21){
+            this.alert.error(this.translate.instant('i18n.errorconfigtip'), {autoClose: true, delay: 3000});
+        }else{
+            this.settingsService.set(this.models).subscribe(
+                response => {
+                    this.form.markAsPristine();
+                    this.updateBib(this.apiResult)
+                },
+                // err => this.alert.error(err.message),
+                // ()  => this.saving = false
             );
-            this.alert.success(this.translate.instant('i18n.savedate'));
-        } else {
-            this.alert.error(this.translate.instant('i18n.errortip'), {autoClose: true, delay: 3000});
-            this.setDefaultValue(this.form.value);
         }
     }
 
     getSettings() {
         // get default form value
         this.settingsService.get().subscribe(settings => {
-            this.form = FormGroupUtil.toFormGroup(Object.assign(new Settings(), settings))
+
+            if(settings){
+                if(settings.cnmarc){
+                    this.form = FormGroupUtil.toFormGroup(Object.assign(new Cnmarc(), settings.cnmarc))
+                }else{
+                    this.form = FormGroupUtil.toFormGroup(Object.assign(new Cnmarc(), this.models.cnmarc))
+                }
+                if(settings.marc21){
+                    this.form21 = FormGroupUtil.toFormGroup(Object.assign(new Marc21(), settings.marc21))
+                }else{
+                    this.form21 = FormGroupUtil.toFormGroup(Object.assign(new Marc21(), this.models.marc21))
+                }
+            }else{
+                this.form = FormGroupUtil.toFormGroup(Object.assign(new Cnmarc(), this.models.cnmarc))
+                this.form21 = FormGroupUtil.toFormGroup(Object.assign(new Marc21(), this.models.marc21))
+            }
+
+            this.models.cnmarc = this.form.value
+            this.models.marc21 = this.form21.value
         });
     }
 
@@ -128,177 +155,125 @@ export class MainComponent implements OnInit, OnDestroy {
         let eoutsubfield;
         let soutsubfield;
         let datafield995;
-        Array.from(doc.getElementsByTagName("datafield")).forEach(datafield => {
-            //To traverse and query the fields in the current collection, update the data if there is one, and rebuild the data if there is none
-            if (this.form.value.holding == datafield.getAttribute("tag")) {
-                this.rebuildorupdate = true;
-                datafield995 = datafield;
+        let CNor21 = 0;
+        let field100='';
+        // console.log(doc)
+
+        let fieldldr = doc.getElementsByTagName("leader")[0].innerHTML
+        Array.from(doc.getElementsByTagName("datafield")).forEach(datafield =>{
+            if(datafield.getAttribute("tag") == '100'){
                 Array.from(datafield.getElementsByTagName("subfield")).forEach(subfield => {
-                    if (this.form.value.classificationNumber == subfield.getAttribute("code")) {
-                        code = subfield.textContent
-                        outsubfield = subfield
-                    }
-                    if (this.form.value.titleNumber == subfield.getAttribute("code")) {
-                        ecode = subfield.textContent
-                        eoutsubfield = subfield
-                    }
-                    if (this.form.value.callNo == subfield.getAttribute("code")) {
-                        scode = subfield.textContent
-                        soutsubfield = subfield
+                    if ('a' == subfield.getAttribute("code")) {
+                        field100 = subfield.textContent
                     }
                 });
-            } else {
-                this.rebuildorupdate = false;
-                if ('690' == datafield.getAttribute("tag")) {
-                    datafield995 = datafield.cloneNode();
-                    datafield995.setAttribute("tag", this.form.value.holding)
+
+            }
+        })
+
+        if(fieldldr.substring(7,8) == 'm' && field100.substring(22,25) == 'chi'){
+            //When conditions are unique, the year of publication must be carried
+            this.form.value.pubyear = true;
+        }else{
+            this.form.value.pubyear = false;
+        }
+        this.form.value.year = field100.substring(9,13);
+
+
+        Array.from(doc.getElementsByTagName("controlfield")).forEach(controlfield =>{
+            // console.log(controlfield.getAttribute("tag"))
+            if(controlfield.getAttribute("tag") == '008'){
+                CNor21 = 1;
+            }
+        })
+        // if(CNor21 = 0){
+        //     Array.from(doc.getElementsByTagName("datafield")).forEach(datafield =>{
+        //         // console.log(controlfield.getAttribute("tag"))
+        //         if(datafield.getAttribute("tag") == '100'){
+        //             CNor21 = 0;
+        //         }
+        //     })
+        // }
+
+        Array.from(doc.getElementsByTagName("datafield")).forEach(datafield => {
+            if(CNor21 == 1){
+                // console.log('1111')
+                //To traverse and query the fields in the current collection, update the data if there is one, and rebuild the data if there is none
+                if (this.form21.value.holding == datafield.getAttribute("tag")) {
+                    this.rebuildorupdate = true;
+                    datafield995 = datafield;
                     Array.from(datafield.getElementsByTagName("subfield")).forEach(subfield => {
-                        if ('a' == subfield.getAttribute("code")) {
+                        if (this.form21.value.classificationNumber == subfield.getAttribute("code")) {
                             code = subfield.textContent
                             outsubfield = subfield
                         }
+                        if (this.form21.value.titleNumber == subfield.getAttribute("code")) {
+                            ecode = subfield.textContent
+                            eoutsubfield = subfield
+                        }
+                        if (this.form21.value.callNo == subfield.getAttribute("code")) {
+                            scode = subfield.textContent
+                            soutsubfield = subfield
+                        }
                     });
+                } else {
+                    this.rebuildorupdate = false;
+                    if (this.form21.value.classification.substring(0,3) == datafield.getAttribute("tag")) {
+                        datafield995 = datafield.cloneNode();
+                        datafield995.setAttribute("tag", this.form21.value.holding)
+                        Array.from(datafield.getElementsByTagName("subfield")).forEach(subfield => {
+                            if (this.form21.value.classification.substring(3,4) == subfield.getAttribute("code")) {
+                                code = subfield.textContent
+                                outsubfield = subfield
+                            }
+                        });
+                    }
+                }
+            }else if(CNor21 == 0){
+                // console.log('000')
+                //To traverse and query the fields in the current collection, update the data if there is one, and rebuild the data if there is none
+                if (this.form.value.holding == datafield.getAttribute("tag")) {
+                    this.rebuildorupdate = true;
+                    datafield995 = datafield;
+                    Array.from(datafield.getElementsByTagName("subfield")).forEach(subfield => {
+                        if (this.form.value.classificationNumber == subfield.getAttribute("code")) {
+                            code = subfield.textContent
+                            outsubfield = subfield
+                        }
+                        if (this.form.value.titleNumber == subfield.getAttribute("code")) {
+                            ecode = subfield.textContent
+                            eoutsubfield = subfield
+                        }
+                        if (this.form.value.callNo == subfield.getAttribute("code")) {
+                            scode = subfield.textContent
+                            soutsubfield = subfield
+                        }
+                    });
+                } else {
+                    this.rebuildorupdate = false;
+                    if (this.form.value.classification.substring(0,3) == datafield.getAttribute("tag")) {
+                        datafield995 = datafield.cloneNode();
+                        datafield995.setAttribute("tag", this.form.value.holding)
+                        Array.from(datafield.getElementsByTagName("subfield")).forEach(subfield => {
+                            if (this.form.value.classification.substring(3,4) == subfield.getAttribute("code")) {
+                                code = subfield.textContent
+                                outsubfield = subfield
+                            }
+                        });
+                    }
                 }
             }
         });
-        if (this.choosebt && !this.rebuildorupdate) {
-            if (!code) {
-                this.loading = false;
-                this.alert.error(this.translate.instant('i18n.rebuilderror'), {autoClose: true, delay: 3000});
-            }
-            let seq;
-            outsubfield.textContent = code.split("/")[0]
-            this.fetch_z311(code).then((res: any) => {
-                datafield995.innerHTML = '';
-                if (this.form.value.institution != '' && this.form.value.institutionType != '') {
-                    const template = `<subfield code=${this.form.value.institutionType}>${this.form.value.institution}</subfield>`;
-                    let tempNode = document.createElementNS("", 'div');
-                    tempNode.innerHTML = template;
-                    let frag = tempNode.firstChild;
-                    datafield995.appendChild(frag)
-                }
 
-                if (code) {
-                    const template = `<subfield code=${this.form.value.classificationNumber}>${code}</subfield>`;
-                    let tempNode = document.createElementNS('', 'div');
-                    tempNode.innerHTML = template;
-                    let frag = tempNode.firstChild;
-                    datafield995.appendChild(frag)
-                }
-
-                seq = this.repair(res.seq)
-
-                if (datafield995 && seq) {
-                    const template = `<subfield code=${this.form.value.titleNumber}>${seq}</subfield>`;
-                    let tempNode = document.createElementNS('', 'div');
-                    tempNode.innerHTML = template;
-                    let frag = tempNode.firstChild;
-                    datafield995.appendChild(frag)
-                }
-
-                if (datafield995 && code && seq) {
-                    const template = `<subfield code=${this.form.value.callNo}>${code}/${seq}</subfield>`;
-                    let tempNode = document.createElementNS("", 'div');
-                    tempNode.innerHTML = template;
-                    let frag = tempNode.firstChild;
-                    datafield995.appendChild(frag)
-                }
-
-                this.sortlist(datafield995)
-
-                if (this.choosebt) {
-                    doc.documentElement.appendChild(datafield995);
-                }
-                value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
-
-                if (this.form.value.holding && this.form.value.classificationNumber && this.form.value.titleNumber && this.form.value.callNo) {
-                    this.updateAnies(value.anies[0]);
-                } else {
-                    this.loading = false;
-                    this.alert.error(this.translate.instant('i18n.errortip'), {autoClose: true, delay: 3000});
-                    this.setDefaultValue(this.form.value);
-                }
-
-            })
-        } else {
-            if (this.choosebt) {
-                let seq;
-                outsubfield.textContent = code.split("/")[0]
-                if (!eoutsubfield || !ecode) {
-                    this.fetch_z311(code).then((res: any) => {
-                        seq = this.repair(res.seq)
-                        if (datafield995 && seq) {
-                            const template = `<subfield code=${this.form.value.titleNumber}>${seq}</subfield>`;
-                            let tempNode = document.createElementNS('', 'div');
-                            tempNode.innerHTML = template;
-                            let frag = tempNode.firstChild;
-                            datafield995.appendChild(frag)
-                        }
-
-                        // datafield995.removeChild(eoutsubfield)
-                        // datafield995.removeChild(soutsubfield)
-
-                        if (!soutsubfield) {
-                            if (datafield995 && code && seq) {
-                                const template = `<subfield code=${this.form.value.callNo}>${code}/${seq}</subfield>`;
-                                let tempNode = document.createElementNS("", 'div');
-                                tempNode.innerHTML = template;
-                                let frag = tempNode.firstChild;
-                                datafield995.appendChild(frag)
-                            }
-                        } else {
-                            if (code && seq) {
-                                soutsubfield.textContent = `${code}/${seq}`
-                            }
-                        }
-                        this.sortlist(datafield995)
-
-                        value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
-
-                        if (this.form.value.holding && this.form.value.classificationNumber && this.form.value.titleNumber && this.form.value.callNo) {
-                            this.updateAnies(value.anies[0]);
-                        } else {
-                            this.loading = false;
-                            this.alert.error(this.translate.instant('i18n.errortip'), {autoClose: true, delay: 3000});
-                            this.setDefaultValue(this.form.value);
-                        }
-                    })
-                } else {
-                    eoutsubfield.textContent = `${ecode}`;
-
-                    if (!soutsubfield) {
-                        if (datafield995 && code && ecode) {
-                            const template = `<subfield code=${this.form.value.callNo}>${code}/${ecode}</subfield>`;
-                            let tempNode = document.createElementNS("", 'div');
-                            tempNode.innerHTML = template;
-                            let frag = tempNode.firstChild;
-                            datafield995.appendChild(frag)
-                        }
-                    } else {
-                        if (code && ecode) {
-                            soutsubfield.textContent = `${code}/${ecode}`
-                        }
-                    }
-                    this.sortlist(datafield995)
-
-                    value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
-
-                    if (this.form.value.holding && this.form.value.classificationNumber && this.form.value.titleNumber && this.form.value.callNo) {
-                        this.updateAnies(value.anies[0]);
-                    } else {
-                        this.loading = false;
-                        this.alert.error(this.translate.instant('i18n.errortip'), {autoClose: true, delay: 3000});
-                        this.setDefaultValue(this.form.value);
-                    }
-                }
-            } else {
+        if(CNor21 == 0){
+            if (this.choosebt && !this.rebuildorupdate) {
                 if (!code) {
                     this.loading = false;
                     this.alert.error(this.translate.instant('i18n.rebuilderror'), {autoClose: true, delay: 3000});
                 }
                 let seq;
                 outsubfield.textContent = code.split("/")[0]
-                this.fetch_z311(code).then((res: any) => {
+                this.fetch_z311(code,this.form.value.lookupUrl).then((res: any) => {
                     datafield995.innerHTML = '';
                     if (this.form.value.institution != '' && this.form.value.institutionType != '') {
                         const template = `<subfield code=${this.form.value.institutionType}>${this.form.value.institution}</subfield>`;
@@ -316,9 +291,8 @@ export class MainComponent implements OnInit, OnDestroy {
                         datafield995.appendChild(frag)
                     }
 
-                    seq = this.repair(res.seq)
+                    seq = this.repair(res.seq,this.form.value.subfieldsize)
 
-                    // if(!eoutsubfield) {
                     if (datafield995 && seq) {
                         const template = `<subfield code=${this.form.value.titleNumber}>${seq}</subfield>`;
                         let tempNode = document.createElementNS('', 'div');
@@ -337,7 +311,7 @@ export class MainComponent implements OnInit, OnDestroy {
 
                     this.sortlist(datafield995)
 
-                    if (!this.choosebt) {
+                    if (this.choosebt) {
                         doc.documentElement.appendChild(datafield995);
                     }
                     value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
@@ -351,16 +325,347 @@ export class MainComponent implements OnInit, OnDestroy {
                     }
 
                 })
-            }
+            } else {
+                if (this.choosebt) {
+                    let seq;
+                    outsubfield.textContent = code.split("/")[0]
+                    if (!eoutsubfield || !ecode) {
+                        this.fetch_z311(code,this.form.value.lookupUrl).then((res: any) => {
+                            seq = this.repair(res.seq,this.form.value.subfieldsize)
+                            if (datafield995 && seq) {
+                                const template = `<subfield code=${this.form.value.titleNumber}>${seq}</subfield>`;
+                                let tempNode = document.createElementNS('', 'div');
+                                tempNode.innerHTML = template;
+                                let frag = tempNode.firstChild;
+                                datafield995.appendChild(frag)
+                            }
 
+                            // datafield995.removeChild(eoutsubfield)
+                            // datafield995.removeChild(soutsubfield)
+
+                            if (!soutsubfield) {
+                                if (datafield995 && code && seq) {
+                                    const template = `<subfield code=${this.form.value.callNo}>${code}/${seq}</subfield>`;
+                                    let tempNode = document.createElementNS("", 'div');
+                                    tempNode.innerHTML = template;
+                                    let frag = tempNode.firstChild;
+                                    datafield995.appendChild(frag)
+                                }
+                            } else {
+                                if (code && seq) {
+                                    soutsubfield.textContent = `${code}/${seq}`
+                                }
+                            }
+                            this.sortlist(datafield995)
+
+                            value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
+
+                            if (this.form.value.holding && this.form.value.classificationNumber && this.form.value.titleNumber && this.form.value.callNo) {
+                                this.updateAnies(value.anies[0]);
+                            } else {
+                                this.loading = false;
+                                this.alert.error(this.translate.instant('i18n.errortip'), {autoClose: true, delay: 3000});
+                                this.setDefaultValue(this.form.value);
+                            }
+                        })
+                    } else {
+                        eoutsubfield.textContent = `${ecode}`;
+
+                        if (!soutsubfield) {
+                            if (datafield995 && code && ecode) {
+                                const template = `<subfield code=${this.form.value.callNo}>${code}/${ecode}</subfield>`;
+                                let tempNode = document.createElementNS("", 'div');
+                                tempNode.innerHTML = template;
+                                let frag = tempNode.firstChild;
+                                datafield995.appendChild(frag)
+                            }
+                        } else {
+                            if (code && ecode) {
+                                soutsubfield.textContent = `${code}/${ecode}`
+                            }
+                        }
+                        this.sortlist(datafield995)
+
+                        value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
+
+                        if (this.form.value.holding && this.form.value.classificationNumber && this.form.value.titleNumber && this.form.value.callNo) {
+                            this.updateAnies(value.anies[0]);
+                        } else {
+                            this.loading = false;
+                            this.alert.error(this.translate.instant('i18n.errortip'), {autoClose: true, delay: 3000});
+                            this.setDefaultValue(this.form.value);
+                        }
+                    }
+                } else {
+                    if (!code) {
+                        this.loading = false;
+                        this.alert.error(this.translate.instant('i18n.rebuilderror'), {autoClose: true, delay: 3000});
+                    }
+                    let seq;
+                    outsubfield.textContent = code.split("/")[0]
+                    this.fetch_z311(code,this.form.value.lookupUrl).then((res: any) => {
+                        datafield995.innerHTML = '';
+                        if (this.form.value.institution != '' && this.form.value.institutionType != '') {
+                            const template = `<subfield code=${this.form.value.institutionType}>${this.form.value.institution}</subfield>`;
+                            let tempNode = document.createElementNS("", 'div');
+                            tempNode.innerHTML = template;
+                            let frag = tempNode.firstChild;
+                            datafield995.appendChild(frag)
+                        }
+
+                        if (code) {
+                            const template = `<subfield code=${this.form.value.classificationNumber}>${code}</subfield>`;
+                            let tempNode = document.createElementNS('', 'div');
+                            tempNode.innerHTML = template;
+                            let frag = tempNode.firstChild;
+                            datafield995.appendChild(frag)
+                        }
+
+                        seq = this.repair(res.seq,this.form.value.subfieldsize)
+
+                        // if(!eoutsubfield) {
+                        if (datafield995 && seq) {
+                            const template = `<subfield code=${this.form.value.titleNumber}>${seq}</subfield>`;
+                            let tempNode = document.createElementNS('', 'div');
+                            tempNode.innerHTML = template;
+                            let frag = tempNode.firstChild;
+                            datafield995.appendChild(frag)
+                        }
+
+                        if (datafield995 && code && seq) {
+                            let temp = `<subfield code=${this.form.value.callNo}>${code}/${seq}</subfield>`;
+                            if(this.form.value.pubyear){
+                                temp = `<subfield code=${this.form.value.callNo}>${code}/${seq}/${this.form.value.year}</subfield>`;
+                            }
+                            const template = temp
+                            let tempNode = document.createElementNS("", 'div');
+                            tempNode.innerHTML = template;
+                            let frag = tempNode.firstChild;
+                            datafield995.appendChild(frag)
+                        }
+
+                        this.sortlist(datafield995)
+
+                        if (!this.choosebt) {
+                            doc.documentElement.appendChild(datafield995);
+                        }
+                        value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
+
+                        if (this.form.value.holding && this.form.value.classificationNumber && this.form.value.titleNumber && this.form.value.callNo) {
+                            this.updateAnies(value.anies[0]);
+                        } else {
+                            this.loading = false;
+                            this.alert.error(this.translate.instant('i18n.errortip'), {autoClose: true, delay: 3000});
+                            this.setDefaultValue(this.form.value);
+                        }
+
+                    })
+                }
+
+            }
+        }else{
+            if (this.choosebt && !this.rebuildorupdate) {
+                if (!code) {
+                    this.loading = false;
+                    this.alert.error(this.translate.instant('i18n.rebuilderror'), {autoClose: true, delay: 3000});
+                }
+                let seq;
+                outsubfield.textContent = code.split("/")[0]
+                this.fetch_z311(code,this.form21.value.lookupUrl).then((res: any) => {
+                    datafield995.innerHTML = '';
+                    if (this.form21.value.institution != '' && this.form21.value.institutionType != '') {
+                        const template = `<subfield code=${this.form21.value.institutionType}>${this.form21.value.institution}</subfield>`;
+                        let tempNode = document.createElementNS("", 'div');
+                        tempNode.innerHTML = template;
+                        let frag = tempNode.firstChild;
+                        datafield995.appendChild(frag)
+                    }
+
+                    if (code) {
+                        const template = `<subfield code=${this.form21.value.classificationNumber}>${code}</subfield>`;
+                        let tempNode = document.createElementNS('', 'div');
+                        tempNode.innerHTML = template;
+                        let frag = tempNode.firstChild;
+                        datafield995.appendChild(frag)
+                    }
+
+                    seq = this.repair(res.seq,this.form21.value.subfieldsize)
+
+                    if (datafield995 && seq) {
+                        const template = `<subfield code=${this.form21.value.titleNumber}>${seq}</subfield>`;
+                        let tempNode = document.createElementNS('', 'div');
+                        tempNode.innerHTML = template;
+                        let frag = tempNode.firstChild;
+                        datafield995.appendChild(frag)
+                    }
+
+                    if (datafield995 && code && seq) {
+                        const template = `<subfield code=${this.form21.value.callNo}>${code}/${seq}</subfield>`;
+                        let tempNode = document.createElementNS("", 'div');
+                        tempNode.innerHTML = template;
+                        let frag = tempNode.firstChild;
+                        datafield995.appendChild(frag)
+                    }
+
+                    this.sortlist(datafield995)
+
+                    if (this.choosebt) {
+                        doc.documentElement.appendChild(datafield995);
+                    }
+                    value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
+
+                    if (this.form21.value.holding && this.form21.value.classificationNumber && this.form21.value.titleNumber && this.form21.value.callNo) {
+                        this.updateAnies(value.anies[0]);
+                    } else {
+                        this.loading = false;
+                        this.alert.error(this.translate.instant('i18n.errortip'), {autoClose: true, delay: 3000});
+                        this.set21DefaultValue(this.form21.value);
+                    }
+
+                })
+            } else {
+                if (this.choosebt) {
+                    let seq;
+                    outsubfield.textContent = code.split("/")[0]
+                    if (!eoutsubfield || !ecode) {
+                        this.fetch_z311(code,this.form21.value.lookupUrl).then((res: any) => {
+                            seq = this.repair(res.seq,this.form21.value.subfieldsize)
+                            if (datafield995 && seq) {
+                                const template = `<subfield code=${this.form21.value.titleNumber}>${seq}</subfield>`;
+                                let tempNode = document.createElementNS('', 'div');
+                                tempNode.innerHTML = template;
+                                let frag = tempNode.firstChild;
+                                datafield995.appendChild(frag)
+                            }
+
+                            // datafield995.removeChild(eoutsubfield)
+                            // datafield995.removeChild(soutsubfield)
+
+                            if (!soutsubfield) {
+                                if (datafield995 && code && seq) {
+                                    const template = `<subfield code=${this.form21.value.callNo}>${code}/${seq}</subfield>`;
+                                    let tempNode = document.createElementNS("", 'div');
+                                    tempNode.innerHTML = template;
+                                    let frag = tempNode.firstChild;
+                                    datafield995.appendChild(frag)
+                                }
+                            } else {
+                                if (code && seq) {
+                                    soutsubfield.textContent = `${code}/${seq}`
+                                }
+                            }
+                            this.sortlist(datafield995)
+
+                            value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
+
+                            if (this.form21.value.holding && this.form21.value.classificationNumber && this.form21.value.titleNumber && this.form21.value.callNo) {
+                                this.updateAnies(value.anies[0]);
+                            } else {
+                                this.loading = false;
+                                this.alert.error(this.translate.instant('i18n.errortip'), {autoClose: true, delay: 3000});
+                                this.set21DefaultValue(this.form21.value);
+                            }
+                        })
+                    } else {
+                        eoutsubfield.textContent = `${ecode}`;
+
+                        if (!soutsubfield) {
+                            if (datafield995 && code && ecode) {
+                                const template = `<subfield code=${this.form21.value.callNo}>${code}/${ecode}</subfield>`;
+                                let tempNode = document.createElementNS("", 'div');
+                                tempNode.innerHTML = template;
+                                let frag = tempNode.firstChild;
+                                datafield995.appendChild(frag)
+                            }
+                        } else {
+                            if (code && ecode) {
+                                soutsubfield.textContent = `${code}/${ecode}`
+                            }
+                        }
+                        this.sortlist(datafield995)
+
+                        value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
+
+                        if (this.form21.value.holding && this.form21.value.classificationNumber && this.form21.value.titleNumber && this.form21.value.callNo) {
+                            this.updateAnies(value.anies[0]);
+                        } else {
+                            this.loading = false;
+                            this.alert.error(this.translate.instant('i18n.errortip'), {autoClose: true, delay: 3000});
+                            this.set21DefaultValue(this.form21.value);
+                        }
+                    }
+                } else {
+                    if (!code) {
+                        this.loading = false;
+                        this.alert.error(this.translate.instant('i18n.rebuilderror'), {autoClose: true, delay: 3000});
+                    }
+                    let seq;
+                    outsubfield.textContent = code.split("/")[0]
+                    this.fetch_z311(code,this.form21.value.lookupUrl).then((res: any) => {
+                        datafield995.innerHTML = '';
+                        if (this.form21.value.institution != '' && this.form21.value.institutionType != '') {
+                            const template = `<subfield code=${this.form21.value.institutionType}>${this.form21.value.institution}</subfield>`;
+                            let tempNode = document.createElementNS("", 'div');
+                            tempNode.innerHTML = template;
+                            let frag = tempNode.firstChild;
+                            datafield995.appendChild(frag)
+                        }
+
+                        if (code) {
+                            const template = `<subfield code=${this.form21.value.classificationNumber}>${code}</subfield>`;
+                            let tempNode = document.createElementNS('', 'div');
+                            tempNode.innerHTML = template;
+                            let frag = tempNode.firstChild;
+                            datafield995.appendChild(frag)
+                        }
+
+                        seq = this.repair(res.seq,this.form21.value.subfieldsize)
+
+                        // if(!eoutsubfield) {
+                        if (datafield995 && seq) {
+                            const template = `<subfield code=${this.form21.value.titleNumber}>${seq}</subfield>`;
+                            let tempNode = document.createElementNS('', 'div');
+                            tempNode.innerHTML = template;
+                            let frag = tempNode.firstChild;
+                            datafield995.appendChild(frag)
+                        }
+
+                        if (datafield995 && code && seq) {
+                            const template = `<subfield code=${this.form21.value.callNo}>${code}/${seq}</subfield>`;
+                            let tempNode = document.createElementNS("", 'div');
+                            tempNode.innerHTML = template;
+                            let frag = tempNode.firstChild;
+                            datafield995.appendChild(frag)
+                        }
+
+                        this.sortlist(datafield995)
+
+                        if (!this.choosebt) {
+                            doc.documentElement.appendChild(datafield995);
+                        }
+                        value.anies[0] = new XMLSerializer().serializeToString(doc.documentElement);
+
+                        if (this.form21.value.holding && this.form21.value.classificationNumber && this.form21.value.titleNumber && this.form21.value.callNo) {
+                            this.updateAnies(value.anies[0]);
+                        } else {
+                            this.loading = false;
+                            this.alert.error(this.translate.instant('i18n.errortip'), {autoClose: true, delay: 3000});
+                            this.set21DefaultValue(this.form21.value);
+                        }
+
+                    })
+                }
+
+            }
         }
+
     }
 
-    repair(value: any) { // complement by subfieldsize 0
+    repair(value: any,size:any) { // complement by subfieldsize 0
         let i = 1;
         let zero = '0';
-        if (value.toString().length < this.form.value.subfieldsize) {
-            while (i < this.form.value.subfieldsize - value.toString().length) {
+        if (value.toString().length < size) {
+            while (i < size - value.toString().length) {
                 zero = zero + '0';
                 i++;
             }
@@ -382,11 +687,11 @@ export class MainComponent implements OnInit, OnDestroy {
         })
     }
 //https://api.exldevnetwork.net.cn  → 临时 https://dxcgj4rqx9.execute-api.cn-north-1.amazonaws.com.cn
-    fetch_z311(key: string) {
+    fetch_z311(key: string,lookupUrl:string) {
         return new Promise((resolve, reject) => {
             this.eventsService.getAuthToken().subscribe(
                 data => {
-                    this.http.get("https://api.exldevnetwork.net.cn" + this.form.value.lookupUrl.replace("KEY", key), {
+                    this.http.get("https://api.exldevnetwork.net.cn" + lookupUrl.replace("KEY", key), {
                         headers: {
                             'X-Proxy-Host': 'http://aleph20.exlibris.com.cn:8992',
                             'Authorization': 'Bearer ' + data
@@ -396,7 +701,7 @@ export class MainComponent implements OnInit, OnDestroy {
                         resolve(data)
                     }, error => {
                         this.loading = false;
-                        this.alert.error(this.translate.instant('i18n.error', {url: "https://dxcgj4rqx9.execute-api.cn-north-1.amazonaws.com.cn" + this.form.value.lookupUrl.replace("KEY", key)}), {autoClose: true, delay: 3000});
+                        this.alert.error(this.translate.instant('i18n.error', {url: "https://api.exldevnetwork.net.cn" + lookupUrl.replace("KEY", key)}), {autoClose: true, delay: 3000});
                         reject(error)
                     })
                 }
@@ -454,6 +759,16 @@ export class MainComponent implements OnInit, OnDestroy {
         } else {
             this.form.value.institutionType = 'a'
         }
+        if (settings.institutionType) {
+            this.form.value.institutionType = settings.institutionType
+        } else {
+            this.form.value.institutionType = 'a'
+        }
+        if (settings.classification) {
+            this.form.value.classification = settings.classification
+        } else {
+            this.form.value.classification = '690a'
+        }
         if (settings.holding) {
             this.form.value.holding = settings.holding
         } else {
@@ -462,7 +777,6 @@ export class MainComponent implements OnInit, OnDestroy {
         if (settings.lookupUrl) {
             this.form.value.lookupUrl = settings.lookupUrl
         } else {
-            // /proxy
             this.form.value.lookupUrl = '/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY'
         }
         if (settings.lookupPrefix) {
@@ -490,6 +804,73 @@ export class MainComponent implements OnInit, OnDestroy {
         } else {
             this.form.value.subfieldsize = '0'
         }
+        if (settings.Publishedyear) {
+            this.form.value.Publishedyear = settings.Publishedyear
+        } else {
+            this.form.value.Publishedyear = false
+        }
+        if (settings.year) {
+            this.form.value.year = settings.year
+        } else {
+            this.form.value.year = ''
+        }
+        if (settings.pubyear) {
+            this.form.value.pubyear = settings.pubyear
+        } else {
+            this.form.value.pubyear = false
+        }
     }
 
+    set21DefaultValue(settings: any) {
+        if (settings.institution) {
+            this.form21.value.institution = settings.institution
+        } else {
+            this.form21.value.institution = '211010'
+        }
+        if (settings.institutionType) {
+            this.form21.value.institutionType = settings.institutionType
+        } else {
+            this.form21.value.institutionType = 'a'
+        }
+        if (settings.classification) {
+            this.form21.value.classification = settings.classification
+        } else {
+            this.form21.value.classification = '093a'
+        }
+        if (settings.holding) {
+            this.form21.value.holding = settings.holding
+        } else {
+            this.form21.value.holding = '905'
+        }
+        if (settings.lookupUrl) {
+            this.form21.value.lookupUrl = settings.lookupUrl
+        } else {
+            this.form21.value.lookupUrl = '/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY'
+        }
+        if (settings.lookupPrefix) {
+            this.form21.value.lookupPrefix = settings.lookupPrefix
+        } else {
+            this.form21.value.lookupPrefix = ''
+        }
+        if (settings.classificationNumber) {
+            this.form21.value.classificationNumber = settings.classificationNumber
+        } else {
+            this.form21.value.classificationNumber = 'a'
+        }
+        if (settings.titleNumber) {
+            this.form21.value.titleNumber = settings.titleNumber
+        } else {
+            this.form21.value.titleNumber = 'b'
+        }
+        if (settings.callNo) {
+            this.form21.value.callNo = settings.callNo
+        } else {
+            this.form21.value.callNo = 'u'
+        }
+        if (settings.subfieldsize) {
+            this.form21.value.subfieldsize = settings.subfieldsize
+        } else {
+            this.form21.value.subfieldsize = '0'
+        }
+    }
 }

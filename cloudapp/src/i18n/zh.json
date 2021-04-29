@@ -3,6 +3,7 @@
     "Settings": "配置",
     "UserCode": "用户代码",
     "UserCodefile" : "用户代码子字段",
+    "Classification": "分类号",
     "Collectionfield": "馆藏字段",
     "CallNumberEnquiry": "索书号查询URL",
     "CallNumberQueryType": "索书号查询类型",
@@ -10,7 +11,7 @@
     "SubfieldOfSpeciesNumber": "种次号子字段",
     "CallNumberSubfield": "索书号子字段",
     "Rebuild": "重新生成",
-    "Update": "更新",
+    "Update": "新建",
     "rebuildorupdateerrortip":"无此馆藏字段，请先重新生成！",
     "errorupdate": "更新数据失败",
     "successupdate": "更新数据成功",
@@ -29,6 +30,9 @@
     "errortip": "馆藏字段、分类号子字段、种次号子字段和索书号子字段不可为空！",
     "subfieldsize": "种次号长度",
     "zero": "非定长",
-    "digits": "位"
+    "digits": "位",
+    "errorconfigtip": "请先配置各项参数",
+    "call-nosub": "分类字段/子字段",
+    "Publishedyear": "索书号含出版年"
   }
 }
