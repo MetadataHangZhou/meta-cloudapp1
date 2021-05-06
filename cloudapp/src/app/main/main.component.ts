@@ -302,7 +302,11 @@ export class MainComponent implements OnInit, OnDestroy {
                     }
 
                     if (datafield995 && code && seq) {
-                        const template = `<subfield code=${this.form.value.callNo}>${code}/${seq}</subfield>`;
+                        let temp = `<subfield code=${this.form.value.callNo}>${code}/${seq}</subfield>`;
+                        if(this.form.value.pubyear){
+                            temp = `<subfield code=${this.form.value.callNo}>${code}/${seq}/${this.form.value.year}</subfield>`;
+                        }
+                        const template = temp
                         let tempNode = document.createElementNS("", 'div');
                         tempNode.innerHTML = template;
                         let frag = tempNode.firstChild;
@@ -345,7 +349,11 @@ export class MainComponent implements OnInit, OnDestroy {
 
                             if (!soutsubfield) {
                                 if (datafield995 && code && seq) {
-                                    const template = `<subfield code=${this.form.value.callNo}>${code}/${seq}</subfield>`;
+                                    let temp = `<subfield code=${this.form.value.callNo}>${code}/${seq}</subfield>`;
+                                    if(this.form.value.pubyear){
+                                        temp = `<subfield code=${this.form.value.callNo}>${code}/${seq}/${this.form.value.year}</subfield>`;
+                                    }
+                                    const template = temp
                                     let tempNode = document.createElementNS("", 'div');
                                     tempNode.innerHTML = template;
                                     let frag = tempNode.firstChild;
@@ -353,7 +361,11 @@ export class MainComponent implements OnInit, OnDestroy {
                                 }
                             } else {
                                 if (code && seq) {
-                                    soutsubfield.textContent = `${code}/${seq}`
+                                    if(this.form.value.pubyear){
+                                        soutsubfield.textContent = `${code}/${seq}/${this.form.value.year}`
+                                    }else{
+                                        soutsubfield.textContent = `${code}/${seq}`
+                                    }
                                 }
                             }
                             this.sortlist(datafield995)
