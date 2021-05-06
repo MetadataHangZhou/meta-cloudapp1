@@ -218,7 +218,7 @@ export class MainComponent implements OnInit, OnDestroy {
                     });
                 } else {
                     this.rebuildorupdate = false;
-                    if (this.form21.value.classification.substring(0,3) == datafield.getAttribute("tag")) {
+                    if (this.form21.value.classification.substring(0,3) == datafield.getAttribute("tag") && !code) {
                         datafield995 = datafield.cloneNode();
                         datafield995.setAttribute("tag", this.form21.value.holding)
                         Array.from(datafield.getElementsByTagName("subfield")).forEach(subfield => {
@@ -251,7 +251,7 @@ export class MainComponent implements OnInit, OnDestroy {
                     });
                 } else {
                     this.rebuildorupdate = false;
-                    if (this.form.value.classification.substring(0,3) == datafield.getAttribute("tag")) {
+                    if (this.form.value.classification.substring(0,3) == datafield.getAttribute("tag") && !code) {
                         datafield995 = datafield.cloneNode();
                         datafield995.setAttribute("tag", this.form.value.holding)
                         Array.from(datafield.getElementsByTagName("subfield")).forEach(subfield => {
