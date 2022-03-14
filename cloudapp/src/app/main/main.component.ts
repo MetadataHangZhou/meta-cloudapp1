@@ -38,7 +38,7 @@ export class MainComponent implements OnInit, OnDestroy {
             institutionType:'a',
             classification:'690',
             holding: '905',
-            lookupUrl: '/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY',
+            lookupUrl: '/proxy/cgi-bin/fetch_z311.cgi?uname=proquest&upass=L0china&key=KEY',
             lookupPrefix:'',
             classificationNumber: 'd',
             titleNumber: 'e',
@@ -50,7 +50,7 @@ export class MainComponent implements OnInit, OnDestroy {
             institutionType:'a',
             classification:'690',
             holding: '090',
-            lookupUrl: '/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY',
+            lookupUrl: '/proxy/cgi-bin/fetch_z311.cgi?uname=proquest&upass=L0china&key=KEY',
             lookupPrefix:'',
             classificationNumber: 'd',
             titleNumber: 'u',
@@ -65,11 +65,25 @@ export class MainComponent implements OnInit, OnDestroy {
                 private translate: TranslateService,
                 private http: HttpClient,
                 private alert: AlertService) {
+
     }
 
     ngOnInit() {
         this.pageLoad$ = this.eventsService.onPageLoad(this.onPageLoad);
+        //检测窗口大小
+        // window.onresize = ()=>{
+        //     if(window.innerWidth > 450){
+        //         console.log( 'onresize:11')
+        //     }else{
+        //         console.log( 'onresize:222')
+        //     }
+        // }
         this.getSettings()
+
+        // this.getcckb('ccc').then((res: any) => {
+        //     console.log(res)
+        // })
+
     }
 
     ngOnDestroy(): void {
@@ -99,6 +113,8 @@ export class MainComponent implements OnInit, OnDestroy {
         } else {
             this.apiResult = {};
         }
+
+
     }
 
     setSettings(value: any) {
@@ -705,7 +721,7 @@ export class MainComponent implements OnInit, OnDestroy {
                 data => {
                     this.http.get("https://api.exldevnetwork.net.cn" + lookupUrl.replace("KEY", key), {
                         headers: {
-                            'X-Proxy-Host': 'http://aleph20.exlibris.com.cn:8992',
+                            'X-Proxy-Host': 'http://n5cloud.library.nenu.edu.cn',
                             'Authorization': 'Bearer ' + data
                         }
                     }).subscribe(function (data) {
@@ -714,6 +730,32 @@ export class MainComponent implements OnInit, OnDestroy {
                     }, error => {
                         this.loading = false;
                         this.alert.error(this.translate.instant('i18n.error', {url: "https://api.exldevnetwork.net.cn" + lookupUrl.replace("KEY", key)}), {autoClose: true, delay: 3000});
+                        reject(error)
+                    })
+                }
+            );
+
+            // resolve({seq: Math.ceil(Math.random() * 99)})
+        })
+
+    }
+
+    getcckb(key: string) {
+        var json = {"apikey":"562930543E3E090957C595704CF28BE4"};
+        return new Promise((resolve, reject) => {
+            this.eventsService.getAuthToken().subscribe(
+                data => {
+                    this.http.post("https://api.exldevnetwork.net.cn" + "/cckbapi/almaBooklist", json,{
+                        headers: {
+                            'X-Proxy-Host': 'http://n5cloud.library.nenu.edu.cn',
+                            'Authorization': 'Bearer ' + data
+                        }
+                    }).subscribe(function (data) {
+                        // this.loading = false;
+                        resolve(data)
+                    }, error => {
+                        // this.loading = false;
+                        // this.alert.error(this.translate.instant('i18n.error', {url: "https://api.exldevnetwork.net.cn" + lookupUrl.replace("KEY", key)}), {autoClose: true, delay: 3000});
                         reject(error)
                     })
                 }
@@ -789,7 +831,7 @@ export class MainComponent implements OnInit, OnDestroy {
         if (settings.lookupUrl) {
             this.form.value.lookupUrl = settings.lookupUrl
         } else {
-            this.form.value.lookupUrl = '/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY'
+            this.form.value.lookupUrl = '/proxy/cgi-bin/fetch_z311.cgi?uname=proquest&upass=L0china&key=KEY'
         }
         if (settings.lookupPrefix) {
             this.form.value.lookupPrefix = settings.lookupPrefix
@@ -857,7 +899,7 @@ export class MainComponent implements OnInit, OnDestroy {
         if (settings.lookupUrl) {
             this.form21.value.lookupUrl = settings.lookupUrl
         } else {
-            this.form21.value.lookupUrl = '/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY'
+            this.form21.value.lookupUrl = '/proxy/cgi-bin/fetch_z311.cgi?uname=proquest&upass=L0china&key=KEY'
         }
         if (settings.lookupPrefix) {
             this.form21.value.lookupPrefix = settings.lookupPrefix

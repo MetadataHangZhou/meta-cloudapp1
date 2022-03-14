@@ -39,7 +39,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
             institutionType:'a',
             classification:'690a',
             holding: '905',
-            lookupUrl: '/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY',
+            lookupUrl: '/proxy/cgi-bin/fetch_z311.cgi?uname=proquest&upass=L0china&key=KEY',
             lookupPrefix:'',
             classificationNumber: 'd',
             titleNumber: 'e',
@@ -54,7 +54,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
             institutionType:'a',
             classification:'093a',
             holding: '905',
-            lookupUrl: '/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY',
+            lookupUrl: '/proxy/cgi-bin/fetch_z311.cgi?uname=proquest&upass=L0china&key=KEY',
             lookupPrefix:'',
             classificationNumber: 'd',
             titleNumber: 'u',
@@ -216,7 +216,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
                 data => {
                     this.http.get("https://api.exldevnetwork.net.cn" + this.form.value.lookupUrl.replace("KEY", key), {
                         headers: {
-                            'X-Proxy-Host': 'http://aleph20.exlibris.com.cn:8992',
+                            'X-Proxy-Host': 'http://n5cloud.library.nenu.edu.cn',
                             'Authorization': 'Bearer ' + data
                         }
                     }).subscribe(function (data) {
@@ -266,7 +266,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
             if (settings.lookupUrl) {
                 this.form.value.lookupUrl = settings.lookupUrl
             } else {
-                this.form.value.lookupUrl = '/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY'
+                this.form.value.lookupUrl = '/proxy/cgi-bin/fetch_z311.cgi?uname=proquest&upass=L0china&key=KEY'
             }
             if (settings.lookupPrefix) {
                 this.form.value.lookupPrefix = settings.lookupPrefix
@@ -332,7 +332,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
             if (settings.lookupUrl) {
                 this.form21.value.lookupUrl = settings.lookupUrl
             } else {
-                this.form21.value.lookupUrl = '/proxy/cgi-bin/fetch_z311.cgi?uname=exlibris&upass=china&key=KEY'
+                this.form21.value.lookupUrl = '/proxy/cgi-bin/fetch_z311.cgi?uname=proquest&upass=L0china&key=KEY'
             }
             if (settings.lookupPrefix) {
                 this.form21.value.lookupPrefix = settings.lookupPrefix

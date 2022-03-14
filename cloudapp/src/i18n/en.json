@@ -33,6 +33,7 @@
     "digits": "digits",
     "errorconfigtip": "Please configure the parameters first",
     "call-nosub": "Classification field/sub-field",
-    "Publishedyear": "Pub. Year included in the call-no.  "
+    "Publishedyear": "Pub. Year included in the call-no. "
+
   }
 }
